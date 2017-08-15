@@ -1,5 +1,5 @@
 <template lang="pug">
-  .new-module
+  .{{name}}
 </template>
 
 <script>
@@ -7,5 +7,5 @@
 </script>
 
 <style lang="scss" scoped>
-  @import './new-module.scss';
+  @import './{{name}}.scss';
 </style>

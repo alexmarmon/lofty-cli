@@ -3,6 +3,7 @@
 const inquirer = require('inquirer');
 const newProjectVue = require('./actions/new-project-vue');
 const newPageVue = require('./actions/new-page-vue');
+const newModuleVue = require('./actions/new-module-vue');
 
 // greeting
 console.log('\n\nWelcome to the Lofty CLI!\n\n')
@@ -38,6 +39,18 @@ inquirer.prompt({
     getFramework().then(which => {
       if (which === 'Vue') {
         const vue = new newPageVue();
+        vue.prompt();
+      } else if (which === 'React') {
+        console.log('not setup yet, nerd.');
+      }
+    })
+  }
+
+  // create a new module
+  if (answer.main === 'Create a new module') {
+    getFramework().then(which => {
+      if (which === 'Vue') {
+        const vue = new newModuleVue();
         vue.prompt();
       } else if (which === 'React') {
         console.log('not setup yet, nerd.');

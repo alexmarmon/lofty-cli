@@ -1,17 +1,13 @@
 <template lang="pug">
-  #new-page
-    v-title
-    v-user
+  #{{name}}
 </template>
 
 <script>
-import Title from './modules/title/title.vue';
-import User from '../../shared_modules/user/user.vue';
+// import modules
 
 export default {
   components: {
-    'v-title': Title,
-    'v-user': User,
+    // specify modules
   },
 };
 </script>

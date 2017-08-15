@@ -5,6 +5,7 @@ const _ = require('lodash');
 const Listr = require('listr');
 const execa = require('execa');
 const handlebars = require('handlebars');
+const newPageVue = require('./new-page-vue');
 
 class newProjectVue {
   // create prompt for new project
@@ -15,32 +16,27 @@ class newProjectVue {
         name: 'name',
         message: 'Project name?',
         default: () => ('new-project')
-      },
-      {
+      },{
         type: 'input',
         name: 'description',
         message: 'Project description?',
         default: () => ('new project')
-      },
-      {
+      },{
         type: 'input',
         name: 'author',
         message: 'Project author?',
         default: () => ('author')
-      },
-      {
+      },{
         type: 'input',
         name: 'port',
         message: 'Project port?',
         default: () => ('3000')
-      },
-      {
+      },{
         type: 'confirm',
         name: 'npm',
         message: 'Run npm install?',
         default: false
-      },
-      {
+      },{
         type: 'confirm',
         name: 'pages',
         message: 'Start page creation?',
@@ -52,7 +48,7 @@ class newProjectVue {
 
   start(answers) {
     // create current working directory const
-    const cwd = path.resolve('../' + _.kebabCase(answers.name));
+    const cwd = path.join('./' + _.kebabCase(answers.name));
 
     // create data object from responses
     const data = {
@@ -73,17 +69,17 @@ class newProjectVue {
         // clone vue template into new directory
         // pass cwd option to specify where execa should execute
         title: 'Git clone',
-        task: () => execa('git', ['clone', 'https://github.com/alexmarmon/vue-vuex-template', cwd], {cwd})
+        task: () => execa('git', ['clone', 'https://github.com/alexmarmon/vue-vuex-template', cwd])
       },
       {
         // add responses to package.json
         title: 'Inject package.json',
-        task: () => this.buildFromTemplate(cwd, './templates/vue/package.json', 'package.json', data)
+        task: () => this.buildFromTemplate(cwd, '/templates/vue/package.json', 'package.json', data)
       },
       {
         // add responses to readme
         title: 'Inject readme',
-        task: () => this.buildFromTemplate(cwd, './templates/vue/README.md', 'README.md', data)
+        task: () => this.buildFromTemplate(cwd, '/templates/vue/README.md', 'README.md', data)
       }
     ]);
 
@@ -95,17 +91,23 @@ class newProjectVue {
       });
     }
 
+
+
     // run the tasks
-    tasks.run().catch(err => console.log(err));
+    tasks.run().then(() => {
+      // run page creation if selection chosen
+      if (answers.pages) {
+        console.log('\n\nPage Creation\n');
+        const vue = new newPageVue();
+        vue.prompt(cwd);
+      }
+    }).catch(err => console.log(err));
   }
 
   // create files using handlebars templates
   buildFromTemplate(cwd, templatePath, newFilePath, data) {
     return new Promise(resolve => {
-      console.log(templatePath);
-      console.log(newFilePath);
-      console.log(cwd);
-      fs.readFile(path.resolve(templatePath), 'utf8', (err, file) => {
+      fs.readFile(path.join(__dirname, '../', templatePath), 'utf8', (err, file) => {
         const template = handlebars.compile(file.toString());
         const fileWithVars = template(data);
         fs.writeFile(path.join(cwd, newFilePath), fileWithVars, () => resolve());
