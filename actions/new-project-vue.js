@@ -87,7 +87,7 @@ class newProjectVue {
     if (answers.npm) {
       tasks.add({
         title: 'Npm install',
-        task: () => execa('npm', ['install'], {cwd: path.resolve('../' + _.kebabCase(answers.name))})
+        task: () => execa('npm', ['install'], {cwd: path.resolve('./' + _.kebabCase(answers.name))})
       });
     }
 
