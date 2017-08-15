@@ -5,9 +5,8 @@ const _ = require('lodash');
 const Listr = require('listr');
 const execa = require('execa');
 const handlebars = require('handlebars');
-const newModuleVue = require('./new-module-vue');
 
-class newPageVue {
+class newModuleVue {
   // create prompt for new project
   prompt(dir = false, again = false) {
     let source = path.resolve('./', 'src/pages/');
@@ -52,7 +51,11 @@ class newPageVue {
     let cwd;
     let page;
     // if started from page creation
-    if (answers.where === 'shared_modules') {
+    if (answers.where === 'shared_modules' && dir) {
+      console.log('haha');
+      cwd = path.resolve('./', dir, 'src/shared_modules/');
+      page = 'na';
+    } else if (answers.where === 'shared_modules') {
       cwd = path.resolve('./', 'src/shared_modules/');
       page = 'na';
     } else if (dir) {
@@ -68,7 +71,7 @@ class newPageVue {
       {
         // create new directory
         title: 'Create dir',
-        task: () => fs.ensureDir(path.join(cwd, _.kebabCase(answers.name)))
+        task: () => fs.ensureDir(path.join(cwd, _.kebabCase(answers.name))).then(() => console.log(path.join(cwd, _.kebabCase(answers.name))))
       },
       {
         // create .vue file
@@ -171,4 +174,4 @@ class newPageVue {
   }
 }
 
-module.exports = newPageVue;
+module.exports = newModuleVue;
