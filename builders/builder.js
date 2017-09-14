@@ -11,6 +11,9 @@ class Builder {
     // This prompt object can be extended or modified by the subclasses
     //  based on the needs of the project.
     this.prompts = this.getPrompts();
+
+    // This is where the main project files come from
+    this.templateGitRepo = '';
   }
 
   // Generates files from a handlebars template
@@ -49,10 +52,10 @@ class Builder {
     return {
       root: {
         dir: '/',
-        src: {
-          dir: 'src/',
-          pages: 'src/pages/',
-          modules: 'src/modules/',
+        app: {
+          dir: 'app/',
+          pages: 'app/pages/',
+          modules: 'app/modules/',
         }
       }
     }

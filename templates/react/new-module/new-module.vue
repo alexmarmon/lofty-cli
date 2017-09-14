@@ -1,5 +1,5 @@
 <template lang="pug">
-  .hello-world
+  .{{name}}
 </template>
 
 <script>
@@ -7,5 +7,5 @@
 </script>
 
 <style lang="scss" scoped>
-  @import './hello-world.scss';
+  @import './{{name}}.scss';
 </style>

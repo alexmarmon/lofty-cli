@@ -1,78 +1,137 @@
 #!/usr/bin/env node
-
+const fs = require('fs-extra');
+const _ = require('lodash');
+const chalk = require('chalk');
 const inquirer = require('inquirer');
-const newProjectVue = require('./actions/new-project-vue');
-const newPageVue = require('./actions/new-page-vue');
-const newModuleVue = require('./actions/new-module-vue');
-const Builder = require('./actions/react.builder.js');
+const VueBuilder = require('./builders/vue.builder.js');
+const ReactBuilder = require('./builders/react.builder.js');
 
-let builder = new Builder();
-builder.project();
-// builder.page();
+class CLI{
+  constructor(){
+    
+    this.options = {
+      project: 'Create a new project',
+      page: 'Create a new page',
+      module: 'Create a new module',
+      push: 'Push a new stage',
+      update: 'Update a current stage',
+      help: 'Show help',
+      exit: 'Exit'
+    }
 
+    // Builders
+    this.builders = {};    
+    this.builderPostfix = '.builder.js';    
+    this.generateBuildersFromFolder('./builders/');
+    
+    //
+    // BEGIN
+    //
+    this.greet();
+  }
 
-// // greeting
-// console.log('\n\nWelcome to the Lofty CLI!\n\n')
+  greet(){
+    // Greeting
+    console.log(`\n\n${chalk.bold(chalk.blue('═════════════════════════'))}`)
+    console.log(`${chalk.bold(chalk.blue('Welcome to the Lofty CLI!'))}`)
+    console.log(`${chalk.bold(chalk.blue('═════════════════════════'))}\n\n`)
+    this.menu();
+  }
 
-// inquirer.prompt({
-//   type: 'list',
-//   name: 'main',
-//   message: 'What would you like to do?',
-//   choices: [
-//     'Create a new project',
-//     'Create a new page',
-//     'Create a new module',
-//     'Push a new stage',
-//     'Update a current stage',
-//     'Show help',
-//     'Exit'
-//   ]
-// }).then((answer) => {
-//   // create a new project
-//   if (answer.main === 'Create a new project') {
-//     getFramework().then(which => {
-//       if (which === 'Vue') {
-//         const vue = new newProjectVue();
-//         vue.prompt();
-//       } else if (which === 'React') {
-//         console.log('not setup yet, nerd.');
-//       }
-//     });
-//   }
+  menu(){
+    inquirer.prompt({
+      type: 'list',
+      name: 'main',
+      message: 'What would you like to do?',
+      choices: [
+        this.options.project,
+        this.options.page,
+        this.options.module,
+        this.options.push,
+        this.options.update,
+        this.options.help,
+        this.options.exit
+      ]
+    }).then((answer) => {
+      switch (answer.main) {
+        case this.options.project:
+          this.project();
+          break;
+        case this.options.page:
+          this.page();
+          break;
+        case this.options.module:
+          this.module();
+          break;
+        default:
+          break;
+      }
+    });
+  }
 
-//   // create a new page
-//   if (answer.main === 'Create a new page') {
-//     getFramework().then(which => {
-//       if (which === 'Vue') {
-//         const vue = new newPageVue();
-//         vue.prompt();
-//       } else if (which === 'React') {
-//         console.log('not setup yet, nerd.');
-//       }
-//     })
-//   }
+  generateBuildersFromFolder(path){
+    this.getAvailableFrameworks(path).then((frameworks) => {
+      for(let i = 0; i < frameworks.length; i++){
+        const path = frameworks[i].path;
+        const name = frameworks[i].name;
+        const framework = require(path);
+        this.builders[name] = new framework();
+      }
+    });
+  }
 
-//   // create a new module
-//   if (answer.main === 'Create a new module') {
-//     getFramework().then(which => {
-//       if (which === 'Vue') {
-//         const vue = new newModuleVue();
-//         vue.prompt();
-//       } else if (which === 'React') {
-//         console.log('not setup yet, nerd.');
-//       }
-//     })
-//   }
-// });
+  getAvailableFrameworks(path){
+    return new Promise(resolve => {
+      let frameworks = [];
+      this.getDirectories(path).then((files) => {
+        for(let i = 0; i < files.length; i++){
+          const file = files[i];
+          if(file.includes(this.builderPostfix)){
+            let frameworkName = file.replace(this.builderPostfix, '');
+            frameworkName = _.capitalize(frameworkName);
+            frameworks.push({name: frameworkName, path: `${path}${file}`});
+          }
+          resolve(frameworks);
+        }
+      })
+    });
+  }
 
-// // function to prompt user for framework
-// function getFramework() {
-//   return new Promise((resolve) => {
-//     inquirer.prompt({
-//       type: 'list',
-//       name: 'which',
-//       message: 'With which framework?',
-//       choices: ['Vue', 'React']
-//     }).then((ans) => resolve(ans.which));
-//   });
-// }
+  getDirectories(source) {
+    return new Promise(resolve => {
+      resolve(fs.readdirSync(source));
+    });
+  }
+
+  // function to prompt user for framework
+  getFramework() {
+    return new Promise((resolve) => {
+      inquirer.prompt({
+        type: 'list',
+        name: 'which',
+        message: 'With which framework?',
+        choices: Object.keys(this.builders),
+      }).then((ans) => resolve(ans.which));
+    });
+  }
+
+  project() {
+    this.getFramework().then(which => {
+      this.builders[which].project();
+    });
+  }
+
+  page() {
+    this.getFramework().then(which => {
+      this.builders[which].page();
+    })
+  }
+ 
+  module() {
+    this.getFramework().then(which => {
+      this.builders[which].module();
+    })
+  }  
+}
+
+const cli = new CLI();

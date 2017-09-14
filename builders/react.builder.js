@@ -10,6 +10,7 @@ class ReactBuilder extends Builder{
   
   constructor(){
     super();
+    this.templateGitRepo = 'https://github.com/alexmarmon/react-mobx-template';
   }
 
   //
@@ -22,52 +23,57 @@ class ReactBuilder extends Builder{
     // Get our shared prompts from the superclass
     const prompts = this.prompts.project;
     inquirer.prompt(prompts).then((answers) => {
+
       // Create current working directory const
-      const cwd = path.join('./' + _.kebabCase(answers.project));
+      const cwd = path.join('./' + _.kebabCase(answers.name));
+
+      //
+      // TASKS
+      //
+
       // Create tasks array
       const tasks = new Listr([
         {
-          // create new directory
+          // Create new directory
           title: 'Create dir',
           task: () => fs.ensureDir(cwd)
         },
         {
-          // clone vue template into new directory
-          // pass cwd option to specify where execa should execute
+          // Clone vue template into new directory
+          // Pass cwd option to specify where execa should execute
           title: 'Git clone',
-          task: () => execa('git', ['clone', 'https://github.com/alexmarmon/vue-vuex-template', cwd])
+          task: () => execa('git', ['clone', this.templateGitRepo, cwd])
         },
         {
-          // add responses to package.json
+          // Add responses to package.json
           title: 'Inject package.json',
-          task: () => this.buildFromTemplate(cwd, '/templates/vue/package.json', 'package.json', answers)
+          task: () => this.buildFromTemplate(cwd, '/templates/react/package.json', 'package.json', answers)
         },
         {
-          // add responses to readme
+          // Add responses to readme
           title: 'Inject readme',
-          task: () => this.buildFromTemplate(cwd, '/templates/vue/README.md', 'README.md', answers)
+          task: () => this.buildFromTemplate(cwd, '/templates/react/README.md', 'README.md', answers)
         }
       ]);
+
+        // Run npm install if selection chosen
+      if (answers.npm) {
+        tasks.add({
+          title: 'Npm install',
+          task: () => execa('npm', ['install'], {cwd: path.resolve('./' + _.kebabCase(answers.name))})
+        });
+      }
+
+      // Run the tasks
+      tasks.run().then(() => {
+        // Run page creation if selection chosen
+        if (answers.pages) {
+          console.log('\n\nPage Creation\n');
+          this.page();
+        }
+      }).catch(err => console.log(err));
     })
     .catch(err => console.log(err))
-
-    // Run npm install if selection chosen
-    if (answers.npm) {
-      tasks.add({
-        title: 'Npm install',
-        task: () => execa('npm', ['install'], {cwd: path.resolve('./' + _.kebabCase(answers.name))})
-      });
-    }
-
-    // Run the tasks
-    tasks.run().then(() => {
-      // Run page creation if selection chosen
-      if (answers.pages) {
-        console.log('\n\nPage Creation\n');
-        const vue = new newPageVue();
-        vue.prompt(cwd);
-      }
-    }).catch(err => console.log(err));
   }
 
   //
@@ -77,7 +83,11 @@ class ReactBuilder extends Builder{
   //
   // Generates a new React module.
   module(){
-    const prompt = this.prompts.module;
+    const prompts = this.prompts.module;
+    inquirer.prompt(prompts).then((answers) => {
+
+    })
+    .catch(err => console.log(err))
   }
 
   //
@@ -88,7 +98,9 @@ class ReactBuilder extends Builder{
   // Generates a new React page.
   page(){
     const prompts = this.prompts.page;
-    inquirer.prompt(prompts).then(answers => console.log(answers))
+    inquirer.prompt(prompts).then((answers) => {
+      
+    })
     .catch(err => console.log(err))
   }
 }
