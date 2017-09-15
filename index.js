@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
+const Logger = require('./util/logger.js');
 const VueBuilder = require('./builders/vue.builder.js');
 const ReactBuilder = require('./builders/react.builder.js');
 
@@ -32,9 +33,17 @@ class CLI{
 
   greet(){
     // Greeting
-    console.log(`\n\n${chalk.bold(chalk.blue('═════════════════════════'))}`)
-    console.log(`${chalk.bold(chalk.blue('Welcome to the Lofty CLI!'))}`)
-    console.log(`${chalk.bold(chalk.blue('═════════════════════════'))}\n\n`)
+    let box = Logger.box({
+      minWidth: 40, 
+      minHeight: 0, 
+      sidePadding: 2, 
+      verticalPadding: 2, 
+      linesOfText: [
+        'Hello there!', 
+        'Welcome to the Lofty CLI',
+      ]
+    });
+    console.log(chalk.blue(box));
     this.menu();
   }
 
@@ -103,7 +112,7 @@ class CLI{
     });
   }
 
-  // function to prompt user for framework
+  // Function to prompt user for framework
   getFramework() {
     return new Promise((resolve) => {
       inquirer.prompt({
