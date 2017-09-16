@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const Listr = require('listr');
 const execa = require('execa');
-const Builder = require('./builder');
+const Builder = require('../builder');
 
 class VueBuilder extends Builder{
   

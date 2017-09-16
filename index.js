@@ -4,8 +4,6 @@ const _ = require('lodash');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const Logger = require('./util/logger.js');
-const VueBuilder = require('./builders/vue.builder.js');
-const ReactBuilder = require('./builders/react.builder.js');
 
 class CLI{
   constructor(){
@@ -21,14 +19,12 @@ class CLI{
     }
 
     // Builders
-    this.builders = {};    
-    this.builderPostfix = '.builder.js';    
-    this.generateBuildersFromFolder('./builders/');
-    
-    //
-    // BEGIN
-    //
-    this.greet();
+    this.builders = {};
+    this.builderPostfix = '.builder';
+    this.generateBuildersFromFolder('./builders/').then(()=>{
+      // BEGIN
+      this.greet();
+    });
   }
 
   greet(){
@@ -79,13 +75,42 @@ class CLI{
   }
 
   generateBuildersFromFolder(path){
-    this.getAvailableFrameworks(path).then((frameworks) => {
-      for(let i = 0; i < frameworks.length; i++){
-        const path = frameworks[i].path;
-        const name = frameworks[i].name;
-        const framework = require(path);
-        this.builders[name] = new framework();
-      }
+    return new Promise(resolve => {
+      // Get all the available framework builders stored in the `path` directory
+      this.getAvailableFrameworks(path).then((frameworks) => {
+        for(let i = 0; i < frameworks.length; i++){
+          const path = frameworks[i].path;
+          const name = frameworks[i].name;
+
+          // Check to see if there's an index.js file in our folder
+          if (fs.existsSync(`${path}/index.js`)){
+            // Load the framework builder
+            const framework = require(path);
+            
+            // If we successfully imported a constructor function 
+            //  from the builder directory
+            if(typeof framework === 'function') {
+              const builderObject = new framework();
+              // Is the builder inheriting from the builder.js superclass?
+              if(builderObject.isBuilder) {
+                this.builders[name] = new framework();
+              }else{
+                Logger.logError(`It looks like the builder in ${path} is not a subclass of Builder in builder.js. You should probs fix that.`)
+              }
+            }
+            // There was a problem with the builder class
+            else{
+              Logger.logError(`There was an issue with the builder in ${path}. This could be due to the class not being exported (module.exports = BuilderName).`);
+            }
+          }
+          // There was a problem with the builder directory
+          else{
+            Logger.logError(`There was an issue with the builder in ${path}. This could be due to a missing index.js file.`);
+          }
+        }
+
+        resolve();
+      });
     });
   }
 
@@ -95,6 +120,7 @@ class CLI{
       this.getDirectories(path).then((files) => {
         for(let i = 0; i < files.length; i++){
           const file = files[i];
+          // Check to see if there's a directory for the framework we want
           if(file.includes(this.builderPostfix)){
             let frameworkName = file.replace(this.builderPostfix, '');
             frameworkName = _.capitalize(frameworkName);

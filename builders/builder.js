@@ -14,6 +14,10 @@ class Builder {
 
     // This is where the main project files come from
     this.templateGitRepo = '';
+
+    // This is a flag for the CLI to use in order to determine the validity of the 
+    //  builders being evaluated
+    this.isBuilder = true;
   }
 
   // Generates files from a handlebars template
