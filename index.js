@@ -7,17 +7,6 @@ const Logger = require('./util/logger.js');
 
 class CLI{
   constructor(){
-    
-    this.options = {
-      project: 'Create a new project',
-      page: 'Create a new page',
-      module: 'Create a new module',
-      push: 'Push a new stage',
-      update: 'Update a current stage',
-      help: 'Show help',
-      exit: 'Exit'
-    }
-
     // Builders
     this.builders = {};
     this.builderPostfix = '.builder';
@@ -44,28 +33,38 @@ class CLI{
   }
 
   menu(){
+    const options = {
+      project: 'Create a new project',
+      page: 'Create a new page',
+      module: 'Create a new module',
+      push: 'Push a new stage',
+      update: 'Update a current stage',
+      help: 'Show help',
+      exit: 'Exit'
+    }
+
     inquirer.prompt({
       type: 'list',
       name: 'main',
       message: 'What would you like to do?',
       choices: [
-        this.options.project,
-        this.options.page,
-        this.options.module,
-        this.options.push,
-        this.options.update,
-        this.options.help,
-        this.options.exit
+        options.project,
+        options.page,
+        options.module,
+        options.push,
+        options.update,
+        options.help,
+        options.exit
       ]
     }).then((answer) => {
       switch (answer.main) {
-        case this.options.project:
+        case options.project:
           this.project();
           break;
-        case this.options.page:
+        case options.page:
           this.page();
           break;
-        case this.options.module:
+        case options.module:
           this.module();
           break;
         default:

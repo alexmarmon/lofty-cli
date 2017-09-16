@@ -1,15 +1,15 @@
-{{project-name}}
+14Four-Vue
 =====================
 
 An application that combines:
 
+* [Node](https://nodejs.org/api/v8.html) Version: ^8.0.0
 * [Vue](https://github.com/vuejs/vue) Version: ^2.4.2
-* [Vuex](https://github.com/vuejs/vuex) Version ^2.3.1
+* [Vuex](https://github.com/vuejs/vuex) Version ^2.4.0
 * [Vue Router](https://github.com/vuejs/vue-router) Version ^2.7.0
-* [Webpack 3](https://github.com/webpack/webpack.js.org) Version: ^3.0.0
-* [Airbnb's ESLint](https://github.com/airbnb/javascript) Version: ^15.0.1
-* [Express](https://expressjs.com/) Version: ^4.15.2
-* [Lofty Config](https://github.com/alexmarmon/lofty-config) Version: ^1.0.0
+* [Webpack 3](https://github.com/webpack/webpack.js.org) Version: ^3.5.6
+* [Airbnb's ESLint](https://github.com/airbnb/javascript) Version: ^11.3.2
+* [Express](https://expressjs.com/) Version: ^4.15.4
 
 ### Getting Started
 ```
@@ -24,7 +24,7 @@ vim creds.json
 // in mysql
 create database template;
 
-mysql -u [user] -p template < /path/to/this/repo/src/api/template.sql
+mysql -u [user] -p template < /path/to/this/repo/api/template.sql
 ```
 
 ### Run It

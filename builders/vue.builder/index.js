@@ -11,6 +11,7 @@ class VueBuilder extends Builder{
   constructor(){
     super();
     this.templateGitRepo = 'https://github.com/alexmarmon/14four-vue.git';
+    this.templateFolder = path.join(__dirname, 'templates');
   }
 
   //
@@ -23,9 +24,11 @@ class VueBuilder extends Builder{
     // Get our shared prompts from the superclass
     const prompts = this.prompts.project;
     inquirer.prompt(prompts).then((answers) => {
-
+      // Format the name of the project
+      this.projectName = _.kebabCase(answers.name);
+      
       // Create current working directory const
-      const cwd = path.join('./' + _.kebabCase(answers.name));
+      const cwd = path.join('./', this.projectName);
 
       //
       // TASKS
@@ -35,25 +38,33 @@ class VueBuilder extends Builder{
       const tasks = new Listr([
         {
           // Create new directory
-          title: 'Create dir',
-          task: () => fs.ensureDir(cwd)
+          title: 'Create file tree',
+          task: () => {
+            this.filetree = this.getFileTree(this.projectName);
+            this.buildFileTree(this.filetree);
+          }
         },
-        {
-          // Clone vue template into new directory
-          // Pass cwd option to specify where execa should execute
-          title: 'Git clone',
-          task: () => execa('git', ['clone', this.templateGitRepo, cwd])
-        },
-        {
-          // Add responses to package.json
-          title: 'Inject package.json',
-          task: () => this.buildFromTemplate(cwd, '/templates/vue/package.json', 'package.json', answers)
-        },
-        {
-          // Add responses to readme
-          title: 'Inject readme',
-          task: () => this.buildFromTemplate(cwd, '/templates/vue/README.md', 'README.md', answers)
-        }
+        // {
+        //   // Create new directory
+        //   title: 'Create dir',
+        //   task: () => fs.ensureDir(cwd)
+        // },
+        // {
+        //   // Clone vue template into new directory
+        //   // Pass cwd option to specify where execa should execute
+        //   title: 'Git clone',
+        //   task: () => execa('git', ['clone', this.templateGitRepo, cwd])
+        // },
+        // {
+        //   // Add responses to package.json
+        //   title: 'Inject package.json',
+        //   task: () => this.buildFromTemplate(cwd, '/templates/vue/package.json', 'package.json', answers)
+        // },
+        // {
+        //   // Add responses to readme
+        //   title: 'Inject readme',
+        //   task: () => this.buildFromTemplate(cwd, '/templates/vue/README.md', 'README.md', answers)
+        // }
       ]);
 
         // Run npm install if selection chosen

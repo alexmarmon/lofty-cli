@@ -12,12 +12,18 @@ class Builder {
     //  based on the needs of the project.
     this.prompts = this.getPrompts();
 
-    // This is where the main project files come from
+    // This is where the main project files come from (if the template relies on a git repo)
     this.templateGitRepo = '';
+
+    // This is where the templates are stored for the builder
+    this.templateFolder = '';
 
     // This is a flag for the CLI to use in order to determine the validity of the 
     //  builders being evaluated
     this.isBuilder = true;
+
+    // This is the name of the project (should be kebab case)
+    this.projectName = '';
   }
 
   // Generates files from a handlebars template
@@ -52,15 +58,42 @@ class Builder {
     console.warn('Not yet implemented by subclass');
   }
 
-  getFileTree(){
+  getFileTree(root = '/'){
     return {
       root: {
-        dir: '/',
+        dir: `${root}`,
         app: {
-          dir: 'app/',
-          pages: 'app/pages/',
-          modules: 'app/modules/',
+          dir: `${root}/app/`,
+          pages: `${root}/app/pages/`,
+          modules: `${root}/app/modules/`,
+          state: `${root}/app/state/`,
+          tests: `${root}/app/tests/`,
+          resources: {
+            dir: `${root}/app/resources/`,
+            scripts: `${root}/app/resources/scripts/`,
+            assets: {
+              dir: `${root}/app/resources/assets/`,
+              styles: `${root}/app/resources/assets/styles/`,
+              fonts: `${root}/app/resources/assets/fonts/`
+            }
+          },
         }
+      }
+    }
+  }
+
+  buildFileTree(fileTreeObject){
+    // This will happen synchronously so we don't run into any race conditions
+    const keys = Object.keys(fileTreeObject);
+    for(let i = 0; i < keys.length; i++){
+      const path = fileTreeObject[keys[i]];
+      // If the path is a string, create the path
+      if(typeof path === 'string' && path !== '/'){
+        fs.mkdirSync(path);
+      }
+      // Otherwise there are subdirectories
+      else if(typeof path === 'object'){
+        this.buildFileTree(path);
       }
     }
   }
@@ -83,6 +116,11 @@ class Builder {
           name: 'author',
           message: 'Project author?',
           default: () => ('author')
+        },{
+          type: 'input',
+          name: 'repo',
+          message: 'Project repository url?',
+          default: () => ('')
         },{
           type: 'input',
           name: 'port',
