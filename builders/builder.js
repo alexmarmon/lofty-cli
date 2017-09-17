@@ -60,7 +60,7 @@ class Builder {
           // Check if it's a file. If it is, we build the template
           else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
             this.buildFromTemplate(destPath, path.join(templatePath, directory), directory, data).catch((error)=>{
-              console.log('error catch: ', error);
+              Logger.logError(error);
             })
           }
         }
@@ -77,6 +77,10 @@ class Builder {
 
   // Generates a new project. Must be implemented by subclass.
   project(){
+    // If you want to extend this project function, insert new prompts into `this.prompts.project`,
+    //  which will update the questions asked and the `answers` variable.
+    //  You can also call super.project().then((data)=>{}) in the subclass to do more actions after
+    //  the initial project has been created.
     return new Promise((resolve)=>{
       inquirer.prompt(this.prompts.project).then((answers) => {
         // Format the name of the project
@@ -108,10 +112,10 @@ class Builder {
             console.log('\n\nPage Creation\n');
             this.page();
           }
+          
+          // Allow the subclass to extend the parent functionality
+          resolve({answers: answers, projectName: projectName});
         }).catch(err => console.log(err));
-
-        // Allow the subclass to extend the parent functionality
-        resolve({answers: answers, projectName: projectName});
       })
     })
   }
