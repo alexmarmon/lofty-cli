@@ -24,6 +24,8 @@ class VueBuilder extends Builder{
     // Get our shared prompts from the superclass
     const prompts = this.prompts.project;
     inquirer.prompt(prompts).then((answers) => {
+      // Set the framework name
+      answers.framework = 'Vue';
       // Format the name of the project
       this.projectName = _.kebabCase(answers.name);
       
@@ -38,17 +40,22 @@ class VueBuilder extends Builder{
       const tasks = new Listr([
         {
           // Create new directory
-          title: 'Create file tree',
+          title: `Create file tree for ${this.projectName}`,
+          task: () => this.buildDefaultFileTree(this.projectName)
+        },{
+          title: 'Create files from template',
           task: () => {
-            this.filetree = this.getFileTree(this.projectName);
-            this.buildFileTree(this.filetree);
+            this.buildFilesFromTemplate(path.join(__dirname, 'templates/new-project/'), `./${this.projectName}`, answers)
           }
         },
+        
         // {
-        //   // Create new directory
-        //   title: 'Create dir',
-        //   task: () => fs.ensureDir(cwd)
-        // },
+        //   title: 'Create README',
+        //   task: () => this.buildFromTemplate(path.join('./', this.projectName), path.join(__dirname, '/templates/new-project/README.md'), 'README.md', answers)
+        // },{
+        //   title: 'Create package.json',
+        //   task: () => this.buildFromTemplate(path.join('./', this.projectName), path.join(__dirname, '/templates/new-project/package.json'), 'package.json', answers)
+        // }
         // {
         //   // Clone vue template into new directory
         //   // Pass cwd option to specify where execa should execute

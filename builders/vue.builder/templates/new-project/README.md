@@ -1,4 +1,4 @@
-14Four-Vue
+{{name}}
 =====================
 
 An application that combines:
@@ -18,13 +18,13 @@ vim creds.json
   "host": "localhost",
   "user": "mysql user",
   "password": "mysql password",
-  "database": "template"
+  "database": "{{name}}"
 }
 
 // in mysql
-create database template;
+create database {{name}};
 
-mysql -u [user] -p template < /path/to/this/repo/api/template.sql
+mysql -u [user] -p {{name}} < /path/to/this/repo/api/{{name}}.sql
 ```
 
 ### Run It

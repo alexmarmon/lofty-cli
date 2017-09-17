@@ -23,7 +23,6 @@ class ReactBuilder extends Builder{
     // Get our shared prompts from the superclass
     const prompts = this.prompts.project;
     inquirer.prompt(prompts).then((answers) => {
-
       // Create current working directory const
       const cwd = path.join('./' + _.kebabCase(answers.name));
 

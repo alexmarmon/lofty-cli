@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const handlebars = require('handlebars');
+const Logger = require('../util/logger.js');
 
 class Builder {
 
@@ -28,13 +29,43 @@ class Builder {
 
   // Generates files from a handlebars template
   buildFromTemplate(cwd, templatePath, newFilePath, data) {
-    return new Promise(resolve => {
-      fs.readFile(path.join(__dirname, '../', templatePath), 'utf8', (err, file) => {
+    return new Promise((resolve, reject) => {
+      fs.readFile(templatePath, 'utf8', (err, file) => {
         const template = handlebars.compile(file.toString());
         const fileWithVars = template(data);
-        fs.writeFile(path.join(cwd, newFilePath), fileWithVars, () => resolve());
+        const writePath = path.join(cwd, newFilePath);
+        fs.outputFile(writePath, fileWithVars, (error) => {
+          if(error){
+            reject(error);
+          }else{
+            resolve();
+          }
+        });
       });
     });
+  }
+
+  // Template path is the path to the folder containing templates (i.e. new-project, new-page, new-module... etc.)
+  buildFilesFromTemplate(templatePath, destPath, data){  
+    return new Promise(resolve => {
+      this.getDirectories(templatePath).then((directories) => {
+        for(let i = 0; i < directories.length; i++){
+          const directory = directories[i];
+          
+          // Check if it's a folder. If it is, we need to be recursive
+          if(fs.lstatSync(path.join(templatePath, directory)).isDirectory()){
+            this.buildFilesFromTemplate(path.join(templatePath, directory), path.join(destPath, directory), data);
+          }
+          // Check if it's a file. If it is, we build the template
+          else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
+            this.buildFromTemplate(destPath, path.join(templatePath, directory), directory, data).catch((error)=>{
+              console.log('error catch: ', error);
+            })
+          }
+        }
+        resolve();
+      })
+    })
   }
 
   getDirectories(source) {
@@ -89,13 +120,23 @@ class Builder {
       const path = fileTreeObject[keys[i]];
       // If the path is a string, create the path
       if(typeof path === 'string' && path !== '/'){
-        fs.mkdirSync(path);
+        if(!fs.existsSync(`${path}`)){
+          fs.mkdirSync(path);
+          // Logger.logSuccess(`Created ${path}`);
+        }else{
+          Logger.logError(`Directory ${path} already exists`);
+        }
       }
       // Otherwise there are subdirectories
       else if(typeof path === 'object'){
         this.buildFileTree(path);
       }
     }
+  }
+
+  buildDefaultFileTree(root = '/'){
+    const filetree = this.getFileTree(root);
+    this.buildFileTree(filetree);
   }
 
   getPrompts(){
