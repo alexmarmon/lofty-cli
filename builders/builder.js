@@ -1,4 +1,8 @@
 const path = require('path');
+const inquirer = require('inquirer');
+const Listr = require('listr');
+const execa = require('execa');
+const _ = require('lodash');
 const fs = require('fs-extra');
 const handlebars = require('handlebars');
 const Logger = require('../util/logger.js');
@@ -22,9 +26,6 @@ class Builder {
     // This is a flag for the CLI to use in order to determine the validity of the 
     //  builders being evaluated
     this.isBuilder = true;
-
-    // This is the name of the project (should be kebab case)
-    this.projectName = '';
   }
 
   // Generates files from a handlebars template
@@ -76,7 +77,43 @@ class Builder {
 
   // Generates a new project. Must be implemented by subclass.
   project(){
-    console.warn('Not yet implemented by subclass');
+    return new Promise((resolve)=>{
+      inquirer.prompt(this.prompts.project).then((answers) => {
+        // Format the name of the project
+        const projectName = _.kebabCase(answers.name);
+        // Create tasks array
+        const tasks = new Listr([
+          {
+            // Create new directory
+            title: `Create file tree for ${projectName}`,
+            task: () => this.buildDefaultFileTree(projectName)
+          },{
+            title: 'Create files from template',
+            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-project'), `./${projectName}`, answers)
+          }
+        ]);
+
+        // Run npm install if selection chosen
+        if (answers.npm) {
+          tasks.add({
+            title: 'Npm install',
+            task: () => execa('npm', ['install'], {cwd: path.resolve('./' + _.kebabCase(answers.name))})
+          });
+        }
+
+        // Run the tasks
+        tasks.run().then(() => {
+          // Run page creation if selection chosen
+          if (answers.pages) {
+            console.log('\n\nPage Creation\n');
+            this.page();
+          }
+        }).catch(err => console.log(err));
+
+        // Allow the subclass to extend the parent functionality
+        resolve({answers: answers, projectName: projectName});
+      })
+    })
   }
 
   // Generates a new module. Must be implemented by subclass.
@@ -98,7 +135,6 @@ class Builder {
           pages: `${root}/app/pages/`,
           modules: `${root}/app/modules/`,
           state: `${root}/app/state/`,
-          tests: `${root}/app/tests/`,
           resources: {
             dir: `${root}/app/resources/`,
             scripts: `${root}/app/resources/scripts/`,

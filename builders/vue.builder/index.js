@@ -12,6 +12,7 @@ class VueBuilder extends Builder{
     super();
     this.templateGitRepo = 'https://github.com/alexmarmon/14four-vue.git';
     this.templateFolder = path.join(__dirname, 'templates');
+    this.frameworkName = 'Vue';
   }
 
   //
@@ -21,77 +22,9 @@ class VueBuilder extends Builder{
   //
   // Generates a new React project.
   project(){
-    // Get our shared prompts from the superclass
-    const prompts = this.prompts.project;
-    inquirer.prompt(prompts).then((answers) => {
-      // Set the framework name
-      answers.framework = 'Vue';
-      // Format the name of the project
-      this.projectName = _.kebabCase(answers.name);
+    super.project().then((data)=>{
       
-      // Create current working directory const
-      const cwd = path.join('./', this.projectName);
-
-      //
-      // TASKS
-      //
-
-      // Create tasks array
-      const tasks = new Listr([
-        {
-          // Create new directory
-          title: `Create file tree for ${this.projectName}`,
-          task: () => this.buildDefaultFileTree(this.projectName)
-        },{
-          title: 'Create files from template',
-          task: () => {
-            this.buildFilesFromTemplate(path.join(__dirname, 'templates/new-project/'), `./${this.projectName}`, answers)
-          }
-        },
-        
-        // {
-        //   title: 'Create README',
-        //   task: () => this.buildFromTemplate(path.join('./', this.projectName), path.join(__dirname, '/templates/new-project/README.md'), 'README.md', answers)
-        // },{
-        //   title: 'Create package.json',
-        //   task: () => this.buildFromTemplate(path.join('./', this.projectName), path.join(__dirname, '/templates/new-project/package.json'), 'package.json', answers)
-        // }
-        // {
-        //   // Clone vue template into new directory
-        //   // Pass cwd option to specify where execa should execute
-        //   title: 'Git clone',
-        //   task: () => execa('git', ['clone', this.templateGitRepo, cwd])
-        // },
-        // {
-        //   // Add responses to package.json
-        //   title: 'Inject package.json',
-        //   task: () => this.buildFromTemplate(cwd, '/templates/vue/package.json', 'package.json', answers)
-        // },
-        // {
-        //   // Add responses to readme
-        //   title: 'Inject readme',
-        //   task: () => this.buildFromTemplate(cwd, '/templates/vue/README.md', 'README.md', answers)
-        // }
-      ]);
-
-        // Run npm install if selection chosen
-      if (answers.npm) {
-        tasks.add({
-          title: 'Npm install',
-          task: () => execa('npm', ['install'], {cwd: path.resolve('./' + _.kebabCase(answers.name))})
-        });
-      }
-
-      // Run the tasks
-      tasks.run().then(() => {
-        // Run page creation if selection chosen
-        if (answers.pages) {
-          console.log('\n\nPage Creation\n');
-          this.page();
-        }
-      }).catch(err => console.log(err));
     })
-    .catch(err => console.log(err))
   }
 
   //
