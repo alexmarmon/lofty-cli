@@ -3,6 +3,8 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
+const path = require('path');
+const cmd = require('node-cmd');
 const Logger = require('./util/logger.js');
 
 class CLI{
@@ -10,7 +12,8 @@ class CLI{
     // Builders
     this.builders = {};
     this.builderPostfix = '.builder';
-    this.generateBuildersFromFolder('./builders/').then(()=>{
+    const builderDirectory = path.join(__dirname, '/builders/');
+    this.generateBuildersFromFolder(builderDirectory).then(()=>{
       // BEGIN
       this.greet();
     });
@@ -37,6 +40,7 @@ class CLI{
       project: 'Create a new project',
       page: 'Create a new page',
       module: 'Create a new module',
+      run: 'Run project in development mode',
       push: 'Push a new stage',
       update: 'Update a current stage',
       help: 'Show help',
@@ -51,6 +55,7 @@ class CLI{
         options.project,
         options.page,
         options.module,
+        options.run,
         options.push,
         options.update,
         options.help,
@@ -67,10 +72,17 @@ class CLI{
         case options.module:
           this.module();
           break;
+        case options.run:
+          this.runProjectInDevelopment();
+          break;
         default:
           break;
       }
     });
+  }
+
+  runProjectInDevelopment(){
+    cmd.run('npm run dev');
   }
 
   generateBuildersFromFolder(path){
@@ -79,7 +91,7 @@ class CLI{
       this.getAvailableFrameworks(path).then((frameworks) => {
         for(let i = 0; i < frameworks.length; i++){
           const path = frameworks[i].path;
-          const name = frameworks[i].name;
+          const name = _.lowerCase(frameworks[i].name);
 
           // Check to see if there's an index.js file in our folder
           if (fs.existsSync(`${path}/index.js`)){
@@ -109,6 +121,58 @@ class CLI{
         }
 
         resolve();
+      });
+    });
+  }
+
+  getExistingProjectInfo(){
+    return new Promise((resolve) => {
+      this.getDirectories('./').then((directories) => {
+        // If we've got a package.json file in 
+        if(directories.indexOf('package.json') > -1){
+          const json = fs.readFileSync('./package.json', 'utf8');
+          const projectInfo = JSON.parse(json);
+          resolve(projectInfo);
+        }
+        resolve(null);
+      });
+    });
+  }
+
+  getFrameworkForExistingProject(){
+    console.log('getting framework')
+    return new Promise((resolve, error) => {
+      // Is there a project already in the current directory?
+      this.getExistingProjectInfo().then((info) => {
+        console.log('getting project info')
+        // If there is a project and the project's `package.json` file has the `framework` attribute
+        if(info != null && typeof info.framework === 'string'){
+          // Check to see if there's actually a builder that matches the project's framework
+          const builder = this.builders[_.lowerCase(info.framework)];
+          if(builder != null && builder.isBuilder){
+            // If there is, we're good to go
+            resolve(builder);
+          }else{
+            // If there isn't, we can't do anything
+            error(`No builder matches '${info.framework}'`);
+          }
+        }
+        // Otherwise there's no framework attribute, so we need to ask the user which framework
+        //  to use out of the available builders
+        else{
+          Logger.logError('`framework` is missing from the package.json');
+          this.getFramework().then(which => {
+            // We need to make sure this builder is valid
+            const builder = this.builders[which];
+            if(builder != null && builder.isBuilder){
+              resolve(builder);
+            }
+            // We don't have a valid builder
+            else{
+              error('Invalid builder');
+            }
+          });
+        }
       });
     });
   }
@@ -150,21 +214,63 @@ class CLI{
   }
 
   project() {
-    this.getFramework().then(which => {
-      this.builders[which].project();
+    // Check to see if there's a project already in the current directory.
+    //  Even though we're gonna create a sub folder for the project,
+    //  it's still weird to create a project inside of a project...
+    this.getExistingProjectInfo().then((info) => {
+      let shouldProceed = true;
+      // If there's already a project in the current directory,
+      //  we don't want to create another project
+      if(info != null){
+        Logger.logError('A project already exists in the current directory...');
+        // Give the option to create a project anyway
+        //  just in case they really know what they're doing
+        inquirer.prompt({
+          type: 'confirm',
+          name: 'proceed',
+          message: 'Proceed anyway?',
+          default: false
+        }).then((ans) => {
+          if(ans.proceed){
+            this.getFramework().then(which => {
+              this.builders[which].project().then(()=>{
+                this.menu();
+              });
+            });
+          }
+        });
+      }
+      // There isn't a project in the current directory
+      //  (or at least there isn't a package.json file...)
+      //  so we can create a new project
+      else{
+        this.getFramework().then(which => {
+          this.builders[which].project().then(() => {
+            this.menu();
+          });
+        });
+      }
     });
   }
 
   page() {
-    this.getFramework().then(which => {
-      this.builders[which].page();
-    })
+    this.getFrameworkForExistingProject().then((builder) => {
+      builder.page().then(() => {
+        this.menu();
+      });
+    }).catch((error) => {
+      Logger.logError(error);
+    });
   }
  
   module() {
-    this.getFramework().then(which => {
-      this.builders[which].module();
-    })
+    this.getFrameworkForExistingProject().then((builder) => {
+      builder.module().then(() => {
+        this.menu();
+      });
+    }).catch((error) => {
+      Logger.logError(error);
+    });
   }  
 }
 

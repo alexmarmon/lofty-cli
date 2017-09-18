@@ -26,6 +26,29 @@ class Builder {
     // This is a flag for the CLI to use in order to determine the validity of the 
     //  builders being evaluated
     this.isBuilder = true;
+
+    // This refers to the current framework the project is using
+    this.frameworkName = '';
+  }
+
+  getFileNameInfoFromPath(path){
+    let pathArray = path.split('/');
+    let fileName = pathArray[pathArray.length - 1];
+    const fileRegex = /(.*)\.(.*)/;
+    const match = fileRegex.exec(fileName);
+    let fullName = '';
+    let name = '';
+    let extension = '';
+
+    if(match.length > 0){ fullName = match[0]; }
+    if(match.length > 1){ name = match[1]; }
+    if(match.length > 2){ extension = match[2]; }
+
+    return {
+      fullName: fullName,
+      name: name,
+      extension: extension
+    }
   }
 
   // Generates files from a handlebars template
@@ -47,7 +70,8 @@ class Builder {
   }
 
   // Template path is the path to the folder containing templates (i.e. new-project, new-page, new-module... etc.)
-  buildFilesFromTemplate(templatePath, destPath, data){  
+  //  nameMaps is an object that maps the template file name to the filename that you want
+  buildFilesFromTemplate(templatePath, destPath, data, nameMaps){  
     return new Promise(resolve => {
       this.getDirectories(templatePath).then((directories) => {
         for(let i = 0; i < directories.length; i++){
@@ -59,7 +83,18 @@ class Builder {
           }
           // Check if it's a file. If it is, we build the template
           else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
-            this.buildFromTemplate(destPath, path.join(templatePath, directory), directory, data).catch((error)=>{
+            let filename = directory;
+
+            // Get the name and extension of the template file so we can map it to the corresponding name from nameMaps
+            const fileInfo = this.getFileNameInfoFromPath(directory);
+            // replaceName is the name we want to change the template name to
+            const replaceName = nameMaps[fileInfo.name]
+            if(nameMaps != null && replaceName && replaceName.length > 0){
+              // Use Regex to replace the template name with the new file name (maintaining the template extension)
+              filename = filename.replace(fileInfo.fullName, `${replaceName}.${fileInfo.extension}`);
+            }
+
+            this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data).catch((error)=>{
               Logger.logError(error);
             })
           }
@@ -83,6 +118,7 @@ class Builder {
     //  the initial project has been created.
     return new Promise((resolve)=>{
       inquirer.prompt(this.prompts.project).then((answers) => {
+        answers.framework = this.frameworkName;
         // Format the name of the project
         const projectName = _.kebabCase(answers.name);
         // Create tasks array
@@ -106,46 +142,80 @@ class Builder {
         }
 
         // Run the tasks
-        tasks.run().then(() => {
-          // Run page creation if selection chosen
-          if (answers.pages) {
-            console.log('\n\nPage Creation\n');
-            this.page();
-          }
-          
+        tasks.run().then(() => {          
           // Allow the subclass to extend the parent functionality
-          resolve({answers: answers, projectName: projectName});
+          resolve({answers: answers, name: projectName});
         }).catch(err => console.log(err));
-      })
-    })
+      });
+    });
   }
 
-  // Generates a new module. Must be implemented by subclass.
+  // Generates a new module.
   module(){
-    console.warn('Not yet implemented by subclass');
+    return new Promise((resolve) => {
+      inquirer.prompt(this.prompts.module).then((answers) => {
+        // Format the name of the module
+        const moduleName = _.kebabCase(answers.name);
+        console.log(path.join(this.fileTree.root.src.modules, `/${moduleName}/`));
+        // Create tasks array
+        const tasks = new Listr([
+          {
+            title: 'Create files from template',
+            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-module'), `./${path.join(this.fileTree.root.src.modules, `/${moduleName}/`)}`, answers)
+          }
+        ]);
+
+        // Run the tasks
+        tasks.run().then(() => {
+          // Allow the subclass to extend the parent functionality
+          resolve({answers: answers, name: moduleName});
+        }).catch(err => console.log(err));
+      }).catch(err => console.log(err));
+    });
   }
 
   // Generates a new page. Must be implemented by subclass.
   page(){
-    console.warn('Not yet implemented by subclass');
+    return new Promise((resolve) => {
+      inquirer.prompt(this.prompts.page).then((answers) => {
+        // Format the name of the module
+        const pageName = _.kebabCase(answers.name);
+        // Create tasks array
+        const tasks = new Listr([
+          {
+            title: 'Create files from template',
+            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-page'), `./${this.fileTree.root.src.pages}`, answers, {'new-page': `${pageName}`})
+          }
+        ]);
+
+        // Run the tasks
+        tasks.run().then(() => {
+          // Allow the subclass to extend the parent functionality
+          resolve({answers: answers, name: pageName});
+        }).catch(err => console.log(err));
+      }).catch(err => console.log(err));
+    });
   }
 
   getFileTree(root = '/'){
     return {
       root: {
         dir: `${root}`,
-        app: {
-          dir: `${root}/app/`,
-          pages: `${root}/app/pages/`,
-          modules: `${root}/app/modules/`,
-          state: `${root}/app/state/`,
+        tests: `${root}/tests/`,
+        config: `${root}/config/`,
+        api: `${root}/api/`,
+        src: {
+          dir: `${root}/src/`,
+          pages: `${root}/src/pages/`,
+          modules: `${root}/src/modules/`,
+          state: `${root}/src/state/`,
           resources: {
-            dir: `${root}/app/resources/`,
-            scripts: `${root}/app/resources/scripts/`,
+            dir: `${root}/src/resources/`,
+            scripts: `${root}/src/resources/scripts/`,
+            styles: `${root}/src/resources/styles/`,
             assets: {
-              dir: `${root}/app/resources/assets/`,
-              styles: `${root}/app/resources/assets/styles/`,
-              fonts: `${root}/app/resources/assets/fonts/`
+              dir: `${root}/src/resources/assets/`,
+              fonts: `${root}/src/resources/assets/fonts/`
             }
           },
         }
@@ -211,12 +281,7 @@ class Builder {
           type: 'confirm',
           name: 'npm',
           message: 'Run npm install?',
-          default: false
-        },{
-          type: 'confirm',
-          name: 'pages',
-          message: 'Start page creation?',
-          default: false
+          default: true
         }
       ],
       module: [
@@ -225,11 +290,6 @@ class Builder {
           name: 'name',
           message: 'Module name?',
           default: () => ('new-module')
-        },{
-          type: 'confirm',
-          name: 'page',
-          message: 'Add another module?',
-          default: false
         }
       ],
       page: [
@@ -238,11 +298,6 @@ class Builder {
           name: 'name',
           message: 'Page name?',
           default: () => ('new-page')
-        },{
-          type: 'confirm',
-          name: 'page',
-          message: 'Add another page?',
-          default: false
         }
       ],
     }
