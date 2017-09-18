@@ -52,67 +52,49 @@ class VueBuilder extends Builder{
   page(){
     return new Promise(resolve => {
       super.page().then((data) => {
+        // Inject the page info into the router
+        this.injectRouter(path.join('./', this.fileTree.root.src.dir, '/router.js'), _.kebabCase(data.answers.name));
         resolve(data);
       });
     });
-    // const prompts = this.prompts.page;
-    // inquirer.prompt(prompts).then((answers) => {
-    //    // create current working directory const
-    //   let cwd;
-    //   // if started from project creation
-    //   if (dir) {
-    //     cwd = path.join('./', dir);
-    //   // if started from within project
-    //   } else {
-    //     cwd = path.resolve('./');
-    //   }
+  }
 
-    //   // create tasks array
-    //   const tasks = new Listr([
-    //     {
-    //       // create new directory
-    //       title: 'Create dir',
-    //       task: () => fs.ensureDir(path.join(cwd, '/src/pages/', _.kebabCase(answers.name)))
-    //     },
-    //     {
-    //       // create page .vue file
-    //       title: 'Create vue file',
-    //       task: () => this.buildFromTemplate(path.join(cwd, '/src/pages/', _.kebabCase(answers.name)), './templates/vue/new-page/new-page.vue', _.kebabCase(answers.name) + '.vue', answers)
-    //     },
-    //     {
-    //       // create modules folder
-    //       title: 'Create modules folder',
-    //       task: () => fs.ensureDir(path.join(cwd, '/src/pages/', _.kebabCase(answers.name), '/modules'))
-    //     },
-    //     {
-    //       // add page to router
-    //       title: 'Add url to router',
-    //       task: () => this.injectRouter(cwd + '/src/router.js', _.kebabCase(answers.name))
-    //     }
-    //   ]);
+  injectRouter(router, name) {
+    return new Promise((resolve, error) => {
+      fs.readFile(router, 'utf8', (err, data) => {
+        if(err){
+          // We had problems reading in the file
+          error(err);
+        }else{
+          // regex match for routes array
+          let reg = /(?:[routes:]*\[)[^]+(?=[\],])/;
+          let routes = reg.exec(data);
+          // split routes into array by new line, remove trailing "  ]"
+          let routesArray = _.dropRight(routes[0].split('\n'));
+          // push new route
+          routesArray.push('    { path: \'/' + name + '\', component: ' + _.upperFirst(_.camelCase(name)) + ' },');
+          // push ending "  ]"
+          routesArray.push('  ]');
+          // join array by new line into string
+          let newRoutes = routesArray.join('\n');
+          // replace old routes string with new routes string
+          const newStuff = data.replace(routes, newRoutes);
 
-    //   // run the tasks
-    //   tasks.run().then(() => {
-    //     console.log('\n');
-    //     if (!answers.page) {
-    //       inquirer.prompt([{
-    //         type: 'confirm',
-    //         name: 'module',
-    //         message: 'Install a new module?',
-    //         default: true
-    //       }]).then(ans => {
-    //         if (ans.module) {
-    //           console.log('\n\nModule Creation\n');
-    //           const vue = new newModuleVue();
-    //           vue.prompt(dir);
-    //         }
-    //       }).catch(err => console.log(err));
-    //     } else {
-    //       this.prompt(dir);
-    //     }
-    //   }).catch(err => console.log(err));
-    // })
-    // .catch(err => console.log(err))
+          // split new file string on double new line
+          let imports = newStuff.split('\n\n');
+          // get first string in array which _should_ be string of imports
+          let newImports = imports[0].concat('\nimport ' + _.upperFirst(_.camelCase(name)) + ' from \'./pages/' + name + '/' + name + '.vue\';');
+          // add new import to end
+          imports[0] = newImports;
+
+          // join array back to string
+          const newFile = imports.join('\n\n');
+
+          // write file
+          fs.writeFile(router, newFile, () => resolve());
+        }
+      });
+    });
   }
 }
 

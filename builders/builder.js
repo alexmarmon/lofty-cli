@@ -104,7 +104,7 @@ class Builder {
 
             this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data).catch((error)=>{
               Logger.logError(error);
-            })
+            });
           }
         }
         resolve();
@@ -205,7 +205,7 @@ class Builder {
     });
   }
 
-  getFileTree(root = '/'){
+  getFileTree(root = ''){
     return {
       root: {
         dir: `${root}`,
