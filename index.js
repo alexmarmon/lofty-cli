@@ -35,7 +35,7 @@ class CLI{
     this.menu();
   }
 
-  menu(){
+  menu(showAll = false){
     const options = {
       project: 'Create a new project',
       page: 'Create a new page',
@@ -43,41 +43,57 @@ class CLI{
       run: 'Run project in development mode',
       push: 'Push a new stage',
       update: 'Update a current stage',
+      showAll: 'Show all options',
       help: 'Show help',
       exit: 'Exit'
     }
 
-    inquirer.prompt({
-      type: 'list',
-      name: 'main',
-      message: 'What would you like to do?',
-      choices: [
-        options.project,
-        options.page,
-        options.module,
-        options.run,
-        options.push,
-        options.update,
-        options.help,
-        options.exit
-      ]
-    }).then((answer) => {
-      switch (answer.main) {
-        case options.project:
-          this.project();
-          break;
-        case options.page:
-          this.page();
-          break;
-        case options.module:
-          this.module();
-          break;
-        case options.run:
-          this.runProjectInDevelopment();
-          break;
-        default:
-          break;
+    this.getExistingProjectInfo().then((info) => {
+      let choices = [];
+      // There wasn't a package.json file, so give the option to make a project
+      if(info == null || showAll){ choices.push(options.project); }
+      // If there was a package.json file, we give more options because a project exists
+      if(info != null || showAll){
+        choices.push(options.page);
+        choices.push(options.module);
+        choices.push(options.run);
+        choices.push(options.push);
+        choices.push(options.update);
       }
+
+      // Allow option to show all if we aren't showing everything
+      if(!showAll){ choices.push(options.showAll); }
+
+      // Always include help and exit
+      choices.push(options.help);
+      choices.push(options.exit);
+
+      inquirer.prompt({
+        type: 'list',
+        name: 'main',
+        message: 'What would you like to do?',
+        choices: choices
+      }).then((answer) => {
+        switch (answer.main) {
+          case options.project:
+            this.project();
+            break;
+          case options.page:
+            this.page();
+            break;
+          case options.module:
+            this.module();
+            break;
+          case options.showAll:
+            this.menu(true);
+            break;
+          case options.run:
+            this.runProjectInDevelopment();
+            break;
+          default:
+            break;
+        }
+      });
     });
   }
 
