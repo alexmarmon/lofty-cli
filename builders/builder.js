@@ -33,16 +33,24 @@ class Builder {
 
   getFileNameInfoFromPath(path){
     let pathArray = path.split('/');
-    let fileName = pathArray[pathArray.length - 1];
-    const fileRegex = /(.*)\.(.*)/;
-    const match = fileRegex.exec(fileName);
+    let fileName = '';
+    let match = {}
+
+    if(pathArray.length > 0){
+      fileName = pathArray[pathArray.length - 1];
+      const fileRegex = /(.*)\.(.*)/;
+      match = fileRegex.exec(fileName);
+    }
+
     let fullName = '';
     let name = '';
     let extension = '';
 
-    if(match.length > 0){ fullName = match[0]; }
-    if(match.length > 1){ name = match[1]; }
-    if(match.length > 2){ extension = match[2]; }
+    if(match){
+      if(match.length > 0){ fullName = match[0]; }
+      if(match.length > 1){ name = match[1]; }
+      if(match.length > 2){ extension = match[2]; }
+    }
 
     return {
       fullName: fullName,
@@ -69,8 +77,11 @@ class Builder {
     });
   }
 
-  // Template path is the path to the folder containing templates (i.e. new-project, new-page, new-module... etc.)
-  //  nameMaps is an object that maps the template file name to the filename that you want
+  // @param Template path is the path to the folder containing templates (i.e. new-project, new-page, new-module... etc.)
+  // @param nameMaps is an object that maps the template file name to the filename that you want.
+  //  For example, if the template file name is `new-file.js` and you want it to be called `my-file.js`,
+  //  pass in the object {'new-file': 'my-file'}, and it will rename the file, maintaining the extension.
+  //  Otherwise, the files will maintain the same names as the template files
   buildFilesFromTemplate(templatePath, destPath, data, nameMaps){  
     return new Promise(resolve => {
       this.getDirectories(templatePath).then((directories) => {
@@ -84,14 +95,11 @@ class Builder {
           // Check if it's a file. If it is, we build the template
           else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
             let filename = directory;
-
             // Get the name and extension of the template file so we can map it to the corresponding name from nameMaps
             const fileInfo = this.getFileNameInfoFromPath(directory);
-            // replaceName is the name we want to change the template name to
-            const replaceName = nameMaps[fileInfo.name]
-            if(nameMaps != null && replaceName && replaceName.length > 0){
+            if(nameMaps != null && nameMaps[fileInfo.name] && nameMaps[fileInfo.name].length > 0){
               // Use Regex to replace the template name with the new file name (maintaining the template extension)
-              filename = filename.replace(fileInfo.fullName, `${replaceName}.${fileInfo.extension}`);
+              filename = filename.replace(fileInfo.fullName, `${nameMaps[fileInfo.name]}.${fileInfo.extension}`);
             }
 
             this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data).catch((error)=>{
@@ -161,7 +169,7 @@ class Builder {
         const tasks = new Listr([
           {
             title: 'Create files from template',
-            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-module'), `./${path.join(this.fileTree.root.src.modules, `/${moduleName}/`)}`, answers)
+            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-module'), `./${path.join(this.fileTree.root.src.modules, `/${moduleName}/`)}`, answers, {'new-module': `${moduleName}`})
           }
         ]);
 
