@@ -1,17 +1,17 @@
 {
-  "name": "{{project-name}}",
+  "name": "{{name}}",
   "version": "1.0.0",
-  "description": "{{project-description}}",
-  "author": "{{project-author}}",
+  "description": "{{description}}",
+  "author": "{{author}}",
   "license": "MIT",
   "repository": "https://github.com/alexmarmon/vue-vuex-template.git",
   "scripts": {
-    "dev": "cross-env PORT={{project-port}} node node_modules/@lofty/lofty-config/vue/dev-server.js",
+    "dev": "cross-env PORT={{port}} node node_modules/@lofty/lofty-config/vue/dev-server.js",
     "lint": "eslint --ext .js --ext .vue src/; exit 0",
     "lint-fix": "eslint --fix --ext .js --ext .vue src/; exit 0",
-    "build": "cross-env PORT={{project-port}} webpack --config node_modules/@lofty/lofty-config/vue/webpack.prod.js --progress --colors --optimize-minimize",
-    "test": "cross-env PORT={{project-port}} node_modules/.bin/ava src/tests",
-    "production": "cross-env PORT={{project-port}} node node_modules/@lofty/lofty-config/vue/prod-server.js"
+    "build": "cross-env PORT={{port}} webpack --config node_modules/@lofty/lofty-config/vue/webpack.prod.js --progress --colors --optimize-minimize",
+    "test": "cross-env PORT={{port}} node_modules/.bin/ava src/tests",
+    "production": "cross-env PORT={{port}} node node_modules/@lofty/lofty-config/vue/prod-server.js"
   },
   "keywords": [
     "vue",
