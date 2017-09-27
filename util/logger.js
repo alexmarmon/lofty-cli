@@ -4,6 +4,7 @@ const chalk = require('chalk');
 class Logger{
   constructor(){
     this.specialCharacters = this.getSpecialCharacters();
+    this.conditionalLogs = false;
   }
 
   getSpecialCharacters(){
@@ -155,6 +156,18 @@ class Logger{
   logTitle(string){ console.log(this.title(string)); }
   logError(string){ console.log(this.error(string)); }
   logSuccess(string){ console.log(this.success(string)); }
+  
+  conditionalLog(...strings) {
+    if(this.conditionalLogs) {
+      for(let i = 0; i < strings.length; i++){
+        if(i === 0){
+          console.log(strings[i]);
+        } else {
+          console.log(`\t${strings[i]}`);
+        }
+      }
+    }
+  }
 }
 
 module.exports = new Logger();

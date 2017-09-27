@@ -53,7 +53,7 @@ class VueBuilder extends Builder{
     return new Promise(resolve => {
       super.page().then((data) => {
         // Inject the page info into the router
-        this.injectRouter(path.join('./', this.fileTree.root.src.dir, '/router.js'), _.kebabCase(data.answers.name));
+        this.injectRouter(path.join('./', this.fileTree.root.src.dir, '/router.js'), data.answers.pageName);
         resolve(data);
       });
     });
@@ -83,7 +83,7 @@ class VueBuilder extends Builder{
           // split new file string on double new line
           let imports = newStuff.split('\n\n');
           // get first string in array which _should_ be string of imports
-          let newImports = imports[0].concat('\nimport ' + _.upperFirst(_.camelCase(name)) + ' from \'./pages/' + name + '/' + name + '.vue\';');
+          let newImports = imports[0].concat('\nimport ' + _.upperFirst(_.camelCase(name)) + ' from \'./pages/' + name + '.vue\';');
           // add new import to end
           imports[0] = newImports;
 

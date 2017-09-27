@@ -11,68 +11,23 @@ class ReactBuilder extends Builder{
   constructor(){
     super();
     this.templateGitRepo = 'https://github.com/alexmarmon/react-mobx-template';
+    this.templateFolder = path.join(__dirname, 'templates');
+    this.frameworkName = 'React';
   }
+
 
   //
   // ────────────────────────────────────────────────────── I ──────────
   //   :::::: P R O J E C T : :  :   :    :     :        :          :
   // ────────────────────────────────────────────────────────────────
   //
-  // Generates a new React project.
+  // Generates a new Vue project. Must return a promise.
   project(){
-    // Get our shared prompts from the superclass
-    const prompts = this.prompts.project;
-    inquirer.prompt(prompts).then((answers) => {
-      // Create current working directory const
-      const cwd = path.join('./' + _.kebabCase(answers.name));
-
-      //
-      // TASKS
-      //
-
-      // Create tasks array
-      const tasks = new Listr([
-        {
-          // Create new directory
-          title: 'Create dir',
-          task: () => fs.ensureDir(cwd)
-        },
-        {
-          // Clone vue template into new directory
-          // Pass cwd option to specify where execa should execute
-          title: 'Git clone',
-          task: () => execa('git', ['clone', this.templateGitRepo, cwd])
-        },
-        {
-          // Add responses to package.json
-          title: 'Inject package.json',
-          task: () => this.buildFromTemplate(cwd, '/templates/react/package.json', 'package.json', answers)
-        },
-        {
-          // Add responses to readme
-          title: 'Inject readme',
-          task: () => this.buildFromTemplate(cwd, '/templates/react/README.md', 'README.md', answers)
-        }
-      ]);
-
-        // Run npm install if selection chosen
-      if (answers.npm) {
-        tasks.add({
-          title: 'Npm install',
-          task: () => execa('npm', ['install'], {cwd: path.resolve('./' + _.kebabCase(answers.name))})
-        });
-      }
-
-      // Run the tasks
-      tasks.run().then(() => {
-        // Run page creation if selection chosen
-        if (answers.pages) {
-          console.log('\n\nPage Creation\n');
-          this.page();
-        }
-      }).catch(err => console.log(err));
-    })
-    .catch(err => console.log(err))
+    return new Promise(resolve => {
+      super.project().then((data)=>{
+        resolve(data);
+      });
+    });
   }
 
   //
@@ -80,13 +35,13 @@ class ReactBuilder extends Builder{
   //   :::::: M O D U L E : :  :   :    :     :        :          :
   // ──────────────────────────────────────────────────────────────
   //
-  // Generates a new React module.
+  // Generates a new Vue module. Must return a promise.
   module(){
-    const prompts = this.prompts.module;
-    inquirer.prompt(prompts).then((answers) => {
-
-    })
-    .catch(err => console.log(err))
+    return new Promise(resolve => {
+      super.module().then((data)=>{
+        resolve(data);
+      });
+    });
   }
 
   //
@@ -94,13 +49,15 @@ class ReactBuilder extends Builder{
   //   :::::: P A G E : :  :   :    :     :        :          :
   // ──────────────────────────────────────────────────────────
   //
-  // Generates a new React page.
+  // Generates a new Vue page. Must return a promise.
   page(){
-    const prompts = this.prompts.page;
-    inquirer.prompt(prompts).then((answers) => {
-      
-    })
-    .catch(err => console.log(err))
+    return new Promise(resolve => {
+      super.page().then((data) => {
+        // Inject the page info into the router
+        // this.injectRouter(path.join('./', this.fileTree.root.src.dir, '/router.js'), data.answers.pageName);
+        resolve(data);
+      });
+    });
   }
 }
 

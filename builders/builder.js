@@ -61,7 +61,9 @@ class Builder {
 
   // Generates files from a handlebars template
   buildFromTemplate(cwd, templatePath, newFilePath, data) {
+    // Logger.conditionalLog(`**Building ${templatePath} to ${newFilePath}**`);
     return new Promise((resolve, reject) => {
+      Logger.conditionalLog(`Attempting to read ${templatePath}`);
       fs.readFile(templatePath, 'utf8', (err, file) => {
         const template = handlebars.compile(file.toString());
         const fileWithVars = template(data);
@@ -82,34 +84,52 @@ class Builder {
   //  For example, if the template file name is `new-file.js` and you want it to be called `my-file.js`,
   //  pass in the object {'new-file': 'my-file'}, and it will rename the file, maintaining the extension.
   //  Otherwise, the files will maintain the same names as the template files
-  buildFilesFromTemplate(templatePath, destPath, data, nameMaps){  
+  buildFilesFromTemplate(templatePath, destPath, data, nameMaps){
     return new Promise(resolve => {
       this.getDirectories(templatePath).then((directories) => {
+        Logger.conditionalLog(`Directories in ${templatePath}: ${directories}`);
+
         for(let i = 0; i < directories.length; i++){
           const directory = directories[i];
-          
-          // Check if it's a folder. If it is, we need to be recursive
-          if(fs.lstatSync(path.join(templatePath, directory)).isDirectory()){
-            this.buildFilesFromTemplate(path.join(templatePath, directory), path.join(destPath, directory), data);
-          }
-          // Check if it's a file. If it is, we build the template
-          else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
-            let filename = directory;
-            // Get the name and extension of the template file so we can map it to the corresponding name from nameMaps
-            const fileInfo = this.getFileNameInfoFromPath(directory);
-            if(nameMaps != null && nameMaps[fileInfo.name] && nameMaps[fileInfo.name].length > 0){
-              // Use Regex to replace the template name with the new file name (maintaining the template extension)
-              filename = filename.replace(fileInfo.fullName, `${nameMaps[fileInfo.name]}.${fileInfo.extension}`);
-            }
+          Logger.conditionalLog(`Reading ${directory}`);
 
-            this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data).catch((error)=>{
-              Logger.logError(error);
-            });
+          // Skip over some useless files
+          const filesToIgnore = ['.DS_Store', '.ttf', ];
+          let shouldSkipFile = false;
+          for(let ignoreIndex = 0; ignoreIndex < filesToIgnore.length; ignoreIndex++) {
+            if (directory.includes(filesToIgnore[ignoreIndex])){
+              Logger.logError(`Cannot build ${templatePath}/${directory}`);
+              shouldSkipFile = true;
+            }
+          }
+          // If we have a valid file
+          if(!shouldSkipFile){
+            // Check if it's a folder. If it is, we need to be recursive
+            if(fs.lstatSync(path.join(templatePath, directory)).isDirectory()){
+              this.buildFilesFromTemplate(path.join(templatePath, directory), path.join(destPath, directory), data);
+            }
+            // Check if it's a file. If it is, we build the template
+            else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
+              let filename = directory;
+              // Get the name and extension of the template file so we can map it to the corresponding name from nameMaps
+              const fileInfo = this.getFileNameInfoFromPath(directory);
+              if(nameMaps != null && nameMaps[fileInfo.name] && nameMaps[fileInfo.name].length > 0){
+                Logger.conditionalLog(`Replacing ${directory} name with ${fileInfo.name}`);
+                // Use Regex to replace the template name with the new file name (maintaining the template extension)
+                filename = filename.replace(fileInfo.fullName, `${nameMaps[fileInfo.name]}.${fileInfo.extension}`);
+              }
+
+              this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data).catch((error)=>{
+                Logger.logError(error);
+              });
+            } else {
+              Logger.logError(`${templatePath}/${directory} is not a file`);
+            }
           }
         }
         resolve();
-      })
-    })
+      });
+    });
   }
 
   getDirectories(source) {
@@ -126,6 +146,7 @@ class Builder {
     //  the initial project has been created.
     return new Promise((resolve)=>{
       inquirer.prompt(this.prompts.project).then((answers) => {
+        Logger.conditionalLog('Retrieved answers from project');
         answers.framework = this.frameworkName;
         // Format the name of the project
         const projectName = _.kebabCase(answers.name);
@@ -153,7 +174,7 @@ class Builder {
         tasks.run().then(() => {          
           // Allow the subclass to extend the parent functionality
           resolve({answers: answers, name: projectName});
-        }).catch(err => console.log(err));
+        }).catch(err => Logger.logError(err));
       });
     });
   }
@@ -163,8 +184,11 @@ class Builder {
     return new Promise((resolve) => {
       inquirer.prompt(this.prompts.module).then((answers) => {
         // Format the name of the module
-        const moduleName = _.kebabCase(answers.name);
-        console.log(path.join(this.fileTree.root.src.modules, `/${moduleName}/`));
+        const moduleName = _.upperFirst(_.camelCase(answers.name));
+        answers.name = _.kebabCase(answers.name);
+        Logger.conditionalLog(path.join(this.fileTree.root.src.modules, `/${answers.name}/`));
+        answers.moduleName = moduleName;
+
         // Create tasks array
         const tasks = new Listr([
           {
@@ -187,7 +211,8 @@ class Builder {
     return new Promise((resolve) => {
       inquirer.prompt(this.prompts.page).then((answers) => {
         // Format the name of the module
-        const pageName = _.kebabCase(answers.name);
+        const pageName = _.upperFirst(_.camelCase(answers.name));
+        answers.pageName = pageName;
         // Create tasks array
         const tasks = new Listr([
           {
