@@ -1,10 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Route } from 'react-router-dom';
 import AppState from './state/AppState';
-
-// include scss
+// import styles
 import './resources/styles/base.scss';
-
 // import pages
 import Home from './pages/Home';
 
@@ -12,11 +10,20 @@ import Home from './pages/Home';
 const appState = new AppState();
 
 export default class Routes extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      routes: [
+        <Route exact path="/" key="home" component={() => <Home state={appState} />} />,
+      ],
+    };
+  }
+
   render() {
     return (
       <BrowserRouter>
         <div id="app-container">
-          <Route exact path="/" component={() => <Home state={appState} />} />
+          {this.state.routes}
         </div>
       </BrowserRouter>
     );

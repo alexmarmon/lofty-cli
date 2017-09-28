@@ -4,13 +4,13 @@ import AppState from '../state/AppState.jsx';
 // import modules here
 
 export default class {{pageName}} extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
   }
 
   render() {
     return (
-      <div id="{{name}}">
+      <div id="{{pageName}}">
         <h1>Welcome to the {{pageName}} page</h1>
       </div>
     );

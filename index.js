@@ -176,11 +176,9 @@ class CLI{
   }
 
   getFrameworkForExistingProject(){
-    console.log('getting framework')
     return new Promise((resolve, error) => {
       // Is there a project already in the current directory?
       this.getExistingProjectInfo().then((info) => {
-        console.log('getting project info')
         // If there is a project and the project's `package.json` file has the `framework` attribute
         if(info != null && typeof info.framework === 'string'){
           // Check to see if there's actually a builder that matches the project's framework
@@ -255,7 +253,6 @@ class CLI{
     //  Even though we're gonna create a sub folder for the project,
     //  it's still weird to create a project inside of a project...
     this.getExistingProjectInfo().then((info) => {
-      let shouldProceed = true;
       // If there's already a project in the current directory,
       //  we don't want to create another project
       if(info != null){

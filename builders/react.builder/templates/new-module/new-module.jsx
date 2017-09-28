@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 import './{{moduleName}}.scss';
 
 export default class {{moduleName}} extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
   }
 
   render() {
