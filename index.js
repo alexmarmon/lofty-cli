@@ -155,6 +155,26 @@ class CLI{
     });
   }
 
+  writeToProjectInfo(key, value){
+    return new Promise((resolve, reject) => {
+      this.getExistingProjectInfo().then((projectInfo) => {
+        if(projectInfo){
+          projectInfo[key] = value;
+          const newProjectInfo = JSON.stringify(projectInfo, null, 2);
+          fs.writeFile('./package.json', newProjectInfo, (error) => {
+            if(error){
+              reject(error)
+            }else{
+              resolve('success')
+            }
+          });
+        }else{
+          reject('package.json file does not exist in this directory');
+        }
+      });
+    })
+  }
+
   getFrameworkForExistingProject(){
     console.log('getting framework')
     return new Promise((resolve, error) => {
@@ -182,6 +202,7 @@ class CLI{
             const builder = this.builders[which];
             if(builder != null && builder.isBuilder){
               resolve(builder);
+              this.writeToProjectInfo('framework', which);
             }
             // We don't have a valid builder
             else{
