@@ -14,6 +14,6 @@ export default class {{moduleName}} extends React.Component {
       <div className="{{name}}">
         <h1>{{moduleName}}</h1>
       </div>
-    )
+    );
   }
 }
