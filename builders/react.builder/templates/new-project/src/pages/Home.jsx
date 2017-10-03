@@ -4,8 +4,8 @@ import AppState from '../state/AppState.jsx';
 // import modules here
 
 export default class Home extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
   }
 
   render() {
