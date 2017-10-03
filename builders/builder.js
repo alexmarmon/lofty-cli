@@ -23,7 +23,7 @@ class Builder {
     // This is where the templates are stored for the builder
     this.templateFolder = '';
 
-    // This is a flag for the CLI to use in order to determine the validity of the 
+    // This is a flag for the CLI to use in order to determine the validity of the
     //  builders being evaluated
     this.isBuilder = true;
 
@@ -171,7 +171,7 @@ class Builder {
         }
 
         // Run the tasks
-        tasks.run().then(() => {          
+        tasks.run().then(() => {
           // Allow the subclass to extend the parent functionality
           resolve({answers: answers, name: projectName});
         }).catch(err => Logger.logError(err));
@@ -234,7 +234,6 @@ class Builder {
     return {
       root: {
         dir: `${root}`,
-        tests: `${root}/tests/`,
         config: `${root}/config/`,
         api: `${root}/api/`,
         src: {
@@ -242,6 +241,7 @@ class Builder {
           pages: `${root}/src/pages/`,
           modules: `${root}/src/modules/`,
           state: `${root}/src/state/`,
+          tests: `${root}/src/tests/`,
           resources: {
             dir: `${root}/src/resources/`,
             scripts: `${root}/src/resources/scripts/`,

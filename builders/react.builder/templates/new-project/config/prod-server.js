@@ -20,7 +20,7 @@ app.use(compress());
 app.use(express.static('prod'));
 
 // serve static folder
-app.use('/assets', express.static('src/assets'))
+app.use('/assets', express.static('src/resources/assets'))
 
 // serve api
 app.use('/api', router);

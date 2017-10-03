@@ -1,7 +1,7 @@
 {
   "name": "{{name}}",
   "version": "2.0.0",
-  "description": "Template with React, MobX, React Router 4, Webpack 3, Airbnb's ESLint, and an Express API",
+  "description": "{{description}}",
   "author": "{{author}}",
   "license": "MIT",
   "repository": "{{repo}}",
@@ -48,7 +48,19 @@
       "max-len": 0,
       "react/require-default-props": 0,
       "react/jsx-wrap-multilines": 0,
-      "import/first": 0
+      "import/first": 0,
+      "quote-props": 0,
+      "radix": 0,
+      "space-infix-ops": 0,
+      "no-unused-vars": 0,
+      "default-case": 0,
+      "no-else-return": 0,
+      "quotes": 0,
+      "no-undef": 0,
+      "react/prefer-stateless-function": 0,
+      "react/no-unused-prop-types": 0,
+      "no-useless-constructor": 0,
+      "import/extensions": 0
     },
     "settings": {
       "import/resolver": {
