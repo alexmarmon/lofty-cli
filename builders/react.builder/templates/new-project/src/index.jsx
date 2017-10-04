@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Routes from './routes';
+import 'whatwg-fetch';  // Fetch polyfill
 
 const renderIt = Component => ReactDOM.render( // eslint-disable-line react/no-render-return-value
   <Component />,
