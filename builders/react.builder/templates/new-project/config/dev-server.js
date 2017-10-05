@@ -27,7 +27,9 @@ watcher.on('ready', function() {
     // clear require cache and re require new files after change
     console.log("Updated backend");
     Object.keys(require.cache).forEach(function(id) {
-      if (/[\/\\]src\/api[\/\\]/.test(id)) delete require.cache[id];
+      if (/[\/\\]api/.test(id)) {
+        delete require.cache[id];
+      }
     });
   });
 });
