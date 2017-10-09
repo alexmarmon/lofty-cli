@@ -7,7 +7,7 @@ const execa = require('execa');
 const Builder = require('../builder');
 
 class ReactBuilder extends Builder{
-  
+
   constructor(){
     super();
     this.templateGitRepo = 'https://github.com/alexmarmon/react-mobx-template';
@@ -54,26 +54,29 @@ class ReactBuilder extends Builder{
     return new Promise(resolve => {
       super.page().then((data) => {
         // Inject the page info into the router
-        this.injectRouter(path.join('./', this.fileTree.root.src.dir, '/routes.jsx'), data.answers.name, data.answers.pageName);
+        this.injectRouter(path.join('./', this.fileTree.root.src.dir, '/routes.jsx'), data.answers.name, data.answers.pageName, data.answers.path);
         resolve(data);
       });
     });
   }
 
-  injectRouter(router, name, pageName) {
+  injectRouter(router, name, pageName, path) {
     return new Promise((resolve, error) => {
       fs.readFile(router, 'utf8', (err, data) => {
         if(err){
           // We had problems reading in the file
           error(err);
         }else{
+          if(path == null && path !== ''){
+            path = name;
+          }
           // regex match for routes array
           let reg = /(?:[routes:]*\[)[^]+(?=[\],])/;
           let routes = reg.exec(data);
           // split routes into array by new line, remove trailing "  ]"
           let routesArray = _.dropRight(routes[0].split('\n'));
           // push new route
-          routesArray.push(`        <Route exact path="/${name}" key="${name}" component={() => <${pageName} state={appState} />} />,`);
+          routesArray.push(`        <Route exact path="/${path}" key="${name}" component={() => <${pageName} state={appState} />} />,`);
           // push ending "  ]"
           routesArray.push('      ]');
           // join array by new line into string

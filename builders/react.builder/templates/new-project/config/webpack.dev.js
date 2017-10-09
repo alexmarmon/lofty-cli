@@ -41,7 +41,7 @@ const config = Merge(CommonConfig, {
               ],
             },
           },
-        ],assets
+        ],
       },
     ],
   },

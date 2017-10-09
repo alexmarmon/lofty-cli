@@ -87,11 +87,32 @@ class Builder {
   buildFilesFromTemplate(templatePath, destPath, data, nameMaps){
     return new Promise(resolve => {
       this.getDirectories(templatePath).then((directories) => {
-        Logger.conditionalLog(`Directories in ${templatePath}: ${directories}`);
+
+        let filesBuilt = 0;
+        let directoriesBuilt = 0;
+
+        // Get total number of files and directories inside folder
+        let numDirectories = 0;
+        let numFiles = 0;
+        for(let i = 0; i < directories.length; i++){
+          const directory = directories[i];
+          if(fs.lstatSync(path.join(templatePath, directory)).isDirectory()){
+            numDirectories++;
+          }
+          else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
+            numFiles++;
+          }
+        }
+
+        // To make our lives easier for checking if we need to resolve
+        function resolveIfNeeded() {
+          if(filesBuilt === numFiles && directoriesBuilt === numDirectories){
+            resolve();
+          }
+        }
 
         for(let i = 0; i < directories.length; i++){
           const directory = directories[i];
-          Logger.conditionalLog(`Reading ${directory}`);
 
           // Skip over some useless files
           const filesToIgnore = ['.DS_Store', '.ttf', ];
@@ -102,14 +123,11 @@ class Builder {
               shouldSkipFile = true;
             }
           }
+
           // If we have a valid file
           if(!shouldSkipFile){
-            // Check if it's a folder. If it is, we need to be recursive
-            if(fs.lstatSync(path.join(templatePath, directory)).isDirectory()){
-              this.buildFilesFromTemplate(path.join(templatePath, directory), path.join(destPath, directory), data);
-            }
             // Check if it's a file. If it is, we build the template
-            else if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
+            if(fs.lstatSync(path.join(templatePath, directory)).isFile()){
               let filename = directory;
               // Get the name and extension of the template file so we can map it to the corresponding name from nameMaps
               const fileInfo = this.getFileNameInfoFromPath(directory);
@@ -119,15 +137,36 @@ class Builder {
                 filename = filename.replace(fileInfo.fullName, `${nameMaps[fileInfo.name]}.${fileInfo.extension}`);
               }
 
-              this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data).catch((error)=>{
-                Logger.logError(error);
-              });
-            } else {
-              Logger.logError(`${templatePath}/${directory} is not a file`);
+              this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data)
+                .then(() => {
+                  // Make sure we finish making all the files in the directory before resolving
+                  filesBuilt++;
+                  // console.log(`FILES: built ${filesBuilt} of ${numFiles}`);
+                  // We don't want to resolve here if the directories above are going to resolve for us later
+                  resolveIfNeeded();
+                })
+                .catch((error)=>{ Logger.logError(error); });
+            }
+            // Check if it's a folder. If it is, we need to be recursive
+            else if(fs.lstatSync(path.join(templatePath, directory)).isDirectory()){
+              this.buildFilesFromTemplate(path.join(templatePath, directory), path.join(destPath, directory), data)
+                .then(() => {
+                  directoriesBuilt++;
+                  // console.log(`DIRECTORIES: built ${directoriesBuilt} of ${numDirectories}`);
+                  resolveIfNeeded();
+                });
+            }
+            else {
+              Logger.logError(`${templatePath}/${directory} is not a file or directory`);
             }
           }
         }
-        resolve();
+
+        // If there's nothing in the folder, we still want to resolve
+        if(directories.length === 0){
+          // console.log('resolving 0 directories');
+          resolveIfNeeded();
+        }
       });
     });
   }
@@ -146,10 +185,10 @@ class Builder {
     //  the initial project has been created.
     return new Promise((resolve)=>{
       inquirer.prompt(this.prompts.project).then((answers) => {
-        Logger.conditionalLog('Retrieved answers from project');
         answers.framework = this.frameworkName;
         // Format the name of the project
         const projectName = _.kebabCase(answers.name);
+        const projectDirectory = `./${answers.name}`;
         // Create tasks array
         const tasks = new Listr([
           {
@@ -157,8 +196,17 @@ class Builder {
             title: `Create file tree for ${projectName}`,
             task: () => this.buildDefaultFileTree(projectName)
           },{
-            title: 'Create files from template',
-            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-project'), `./${projectName}`, answers)
+            title: 'Create project from template',
+            task: () => {
+              this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-project'), `./${projectName}`, answers)
+                .then(this.pageWithInfo({ name: 'Home' }, projectDirectory))
+                .then(() => {
+                  // If the subclass implements the 'injectRouter' method
+                  if(typeof this.injectRouter === 'function'){
+                    this.injectRouter(path.join(projectDirectory, this.fileTree.root.src.dir, '/routes.jsx'), 'Home', 'Home', '');
+                  }
+                });
+            }
           }
         ]);
 
@@ -179,53 +227,66 @@ class Builder {
     });
   }
 
-  // Generates a new module.
-  module(){
+  moduleWithInfo(data) {
     return new Promise((resolve) => {
-      inquirer.prompt(this.prompts.module).then((answers) => {
-        // Format the name of the module
-        const moduleName = _.upperFirst(_.camelCase(answers.name));
-        answers.name = _.kebabCase(answers.name);
-        Logger.conditionalLog(path.join(this.fileTree.root.src.modules, `/${answers.name}/`));
-        answers.moduleName = moduleName;
+      // Format the name of the module
+      const moduleName = _.upperFirst(_.camelCase(data.name));
+      data.name = _.kebabCase(data.name);
+      Logger.conditionalLog(path.join(this.fileTree.root.src.modules, `/${data.name}/`));
+      data.moduleName = moduleName;
 
-        // Create tasks array
-        const tasks = new Listr([
-          {
-            title: 'Create files from template',
-            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-module'), `./${path.join(this.fileTree.root.src.modules, `/${moduleName}/`)}`, answers, {'new-module': `${moduleName}`})
-          }
-        ]);
+      // Create tasks array
+      const tasks = new Listr([
+        {
+          title: 'Create module from template',
+          task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-module'), `./${path.join(this.fileTree.root.src.modules, `/${moduleName}/`)}`, answers, {'new-module': `${moduleName}`})
+        }
+      ]);
 
-        // Run the tasks
-        tasks.run().then(() => {
-          // Allow the subclass to extend the parent functionality
-          resolve({answers: answers, name: moduleName});
-        }).catch(err => console.log(err));
+      // Run the tasks
+      tasks.run().then(() => {
+        // Allow the subclass to extend the parent functionality
+        resolve({answers: data, name: moduleName});
       }).catch(err => console.log(err));
     });
   }
 
-  // Generates a new page. Must be implemented by subclass.
+  // Generates a new module.
+  module(){
+    return new Promise((resolve) => {
+      inquirer.prompt(this.prompts.module).then((answers) => {
+        return this.moduleWithInfo(answers);
+      }).catch(err => console.log(err));
+    });
+  }
+
+  // Create page without user prompts
+  pageWithInfo(data, projectRoot = '.') {
+    return new Promise((resolve) => {
+      // Format the name of the module
+      const pageName = _.upperFirst(_.camelCase(data.name));
+      data.pageName = pageName;
+      // Create tasks array
+      const tasks = new Listr([
+        {
+          title: 'Create page from template',
+          task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-page'), `${projectRoot}/${this.fileTree.root.src.pages}`, data, {'new-page': `${pageName}`})
+        }
+      ]);
+
+      // Run the tasks
+      tasks.run().then(() => {
+        // Allow the subclass to extend the parent functionality
+        resolve({answers: data, name: pageName});
+      }).catch(err => console.log(err));
+    });
+  }
+
+  // Generates a new page using answers from user. Must be implemented by subclass.
   page(){
     return new Promise((resolve) => {
       inquirer.prompt(this.prompts.page).then((answers) => {
-        // Format the name of the module
-        const pageName = _.upperFirst(_.camelCase(answers.name));
-        answers.pageName = pageName;
-        // Create tasks array
-        const tasks = new Listr([
-          {
-            title: 'Create files from template',
-            task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-page'), `./${this.fileTree.root.src.pages}`, answers, {'new-page': `${pageName}`})
-          }
-        ]);
-
-        // Run the tasks
-        tasks.run().then(() => {
-          // Allow the subclass to extend the parent functionality
-          resolve({answers: answers, name: pageName});
-        }).catch(err => console.log(err));
+        return this.pageWithInfo(answers);
       }).catch(err => console.log(err));
     });
   }
