@@ -5,6 +5,8 @@ const chalk = require('chalk');
 const inquirer = require('inquirer');
 const path = require('path');
 const cmd = require('node-cmd');
+const exec = require('ssh-exec');
+const Listr = require('listr');
 const Logger = require('./util/logger.js');
 
 class CLI{
@@ -22,12 +24,12 @@ class CLI{
   greet(){
     // Greeting
     let box = Logger.box({
-      minWidth: 40, 
-      minHeight: 0, 
-      sidePadding: 2, 
-      verticalPadding: 2, 
+      minWidth: 40,
+      minHeight: 0,
+      sidePadding: 2,
+      verticalPadding: 2,
       linesOfText: [
-        'Hello there!', 
+        'Hello there!',
         'Welcome to the Lofty CLI',
       ]
     });
@@ -90,10 +92,199 @@ class CLI{
           case options.run:
             this.runProjectInDevelopment();
             break;
+          case options.update:
+            this.updateProjectStage();
+            break;
           default:
             break;
         }
       });
+    });
+  }
+
+  writeSSHCreds(user = '', host = '', path = '') {
+    return new Promise((resolve, reject) => {
+      // create host and current user
+      const newCreds = {
+        user,
+        host,
+        path
+      };
+      // build questions array
+      const questions = [];
+      if (newCreds.user === '') {
+        questions.push({
+          type: 'input',
+          name: 'user',
+          message: 'User?',
+          default: () => ('user')
+        });
+      }
+      if (newCreds.host === '') {
+        questions.push({
+          type: 'input',
+          name: 'host',
+          message: 'Host?',
+          default: () => ('ec2-**-***-***-***.us-****-*.compute.amazonaws.com')
+        });
+      }
+      if (newCreds.path === '') {
+        questions.push({
+          type: 'input',
+          name: 'path',
+          message: 'Path to private key',
+          default: () => ('/Users/user/.ssh/id_rsa')
+        });
+      }
+      // prompt for responses
+      inquirer.prompt(questions).then((answers) => {
+        if (newCreds.user === '') { newCreds.user = answers.user; }
+        if (newCreds.host === '') { newCreds.host = answers.host; }
+        if (newCreds.path === '') { newCreds.path = answers.path; }
+        // write file for next time
+        fs.writeFileSync(__dirname + '/creds.json', JSON.stringify(newCreds));
+        // resolve promise with creds
+        resolve({ user: newCreds.user, host: newCreds.host, path: newCreds.path });
+      });
+    });
+  }
+
+  checkSSHCreds() {
+    return new Promise((resolve, reject) => {
+      if (fs.existsSync(__dirname + '/creds.json')) {
+        // check for host and current user
+        const creds = JSON.parse(fs.readFileSync(__dirname + '/creds.json'));
+        if (!creds.user && !creds.host && !creds.path) {
+          // neither exist
+          this.writeSSHCreds().then(({user, host, path}) => resolve({user, host, path}));
+        } else if (!creds.user) {
+          // user doesnt exist
+          this.writeSSHCreds('', creds.host, creds.path).then(({user, host, path}) => resolve({user, host, path}));
+        } else if (!creds.host) {
+          // host doesnt exist
+          this.writeSSHCreds(creds.user, '', creds.path).then(({user, host, path}) => resolve({user, host, path}));
+        } else if (!creds.path) {
+          // path doesnt exist
+          this.writeSSHCreds(creds.user, creds.host, '').then(({user, host, path}) => resolve({user, host, path}));
+        } else {
+          // all exist, continue.
+          resolve({ user: creds.user, host: creds.host, path: creds.path });
+        }
+      } else {
+        // create the file
+        this.writeSSHCreds().then(({user, host, path}) => {
+          resolve({user, host, path})
+        });
+      }
+    });
+  }
+
+  runLatestBuild() {
+    return new Promise((resolve, reject) => {
+      cmd.get('npm run build', () => {
+        resolve();
+      });
+    });
+  }
+
+  pushChangesToGit(msg) {
+    return new Promise((resolve, reject) => {
+      cmd.get('git add .', () => {
+        cmd.get('git commit -m "' + msg + '"', () => {
+          cmd.get('git push', () => {
+            resolve();
+          });
+        });
+      });
+    });
+  }
+
+  pullChangesOnServer({ user, host, path }) {
+    return new Promise((resolve, reject) => {
+      this.getExistingProjectInfo().then((projectInfo) => {
+        const command = 'cd /home/sites/' + projectInfo.name + '; git pull';
+        exec(command, { user, host, privateKey: fs.readFileSync(path) }, (err, stdout, stderr) => {
+          resolve();
+        });
+      });
+    });
+  }
+
+  updatePM2Process({ host, path }) {
+    return new Promise((resolve, reject) => {
+      this.getExistingProjectInfo().then((projectInfo) => {
+        const command = 'pm2 restart ' + projectInfo.name;
+        exec(command, { user: 'pm2', host, privateKey: fs.readFileSync(path) }, (err, stdout, stderr) => {
+          if (stderr.length > 1) {
+            reject(stderr);
+          } else {
+            resolve();
+          }
+        });
+      });
+    });
+  }
+
+  updateProjectStage() {
+    inquirer.prompt({
+      type: 'input',
+      name: 'msg',
+      message: 'Git message'
+    }).then((answer) => {
+      const tasks = new Listr([
+        {
+          // run latest build
+          title: 'Run latest build',
+          task: () => new Promise((resolve, reject) => {
+            this.runLatestBuild()
+            .then(() => resolve('runLatestBuild: success')).catch(e => reject(new Error(e)));
+          })
+        },{
+          // Push changes to git
+          title: 'Push local changes to git',
+          task: () => new Promise((resolve, reject) => {
+            this.pushChangesToGit(answer.msg)
+            .then(() => resolve('pushChangesToGit: success')).catch(e => reject(new Error(e)));
+          })
+        },{
+          // get ssh creds
+          title: 'Look for SSH creds',
+          task: ctx => new Promise((resolve, reject) => {
+            this.checkSSHCreds().then(({user, host, path}) => {
+              ctx.user = user;
+              ctx.host = host;
+              ctx.path = path;
+              resolve('checkSSHCreds: sucess');
+            }).catch(e => reject(new Error(e)));
+          })
+        },{
+          // pull changes on server
+          title: 'Pull changes on server',
+          task: ctx => new Promise((resolve, reject) => {
+            this.pullChangesOnServer({ user: ctx.user, host: ctx.host, path: ctx.path })
+            .then(() => resolve('pullChangesOnServer: success'))
+            .catch(e => reject(new Error(e)));
+          })
+        },{
+          // update pm2 process on server
+          title: 'Update pm2 process',
+          task: ctx => new Promise((resolve, reject) => {
+            this.updatePM2Process({ host: ctx.host, path: ctx.path })
+            .then(() => resolve('updatePM2Process: success'))
+            .catch(e => reject(new Error(e)));
+          })
+        }
+      ]);
+
+      // Run the tasks
+      tasks.run({user: '', host: '', path: ''}).then(ctx => {
+        this.getExistingProjectInfo().then((projectInfo) => {
+          console.log('\n\nChanges are live at: ' + chalk.blue(projectInfo.name + '.thatslofty.com') + '\n\n');
+        });
+      }).catch(err => console.log(err)); // errors handled in listr
+
+      // this.checkSSHCreds().then(({user, host, path}) => this.pullChangesOnServer({user, host, path})).then(r => console.log(r))
+      // .catch(e => console.log(e));
     });
   }
 
@@ -113,8 +304,8 @@ class CLI{
           if (fs.existsSync(`${path}/index.js`)){
             // Load the framework builder
             const framework = require(path);
-            
-            // If we successfully imported a constructor function 
+
+            // If we successfully imported a constructor function
             //  from the builder directory
             if(typeof framework === 'function') {
               const builderObject = new framework();
@@ -144,7 +335,7 @@ class CLI{
   getExistingProjectInfo(){
     return new Promise((resolve) => {
       this.getDirectories('./').then((directories) => {
-        // If we've got a package.json file in 
+        // If we've got a package.json file in
         if(directories.indexOf('package.json') > -1){
           const json = fs.readFileSync('./package.json', 'utf8');
           const projectInfo = JSON.parse(json);
@@ -296,7 +487,7 @@ class CLI{
       Logger.logError(error);
     });
   }
- 
+
   module() {
     this.getFrameworkForExistingProject().then((builder) => {
       builder.module().then(() => {
@@ -305,7 +496,7 @@ class CLI{
     }).catch((error) => {
       Logger.logError(error);
     });
-  }  
+  }
 }
 
 const cli = new CLI();
