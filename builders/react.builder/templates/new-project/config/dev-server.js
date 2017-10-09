@@ -60,7 +60,7 @@ app.use(hotMiddleware);
 app.use(bodyParser.json());
 
 // server static files
-app.use('/assets', express.static('src/assets'))
+app.use('/assets', express.static('src/resources/assets'))
 
 // start server
 app.listen(port);

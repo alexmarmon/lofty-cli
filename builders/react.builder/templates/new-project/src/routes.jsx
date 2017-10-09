@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { Router, Route } from 'react-router-dom';
 import AppState from './state/AppState';
 // import styles
 import './resources/styles/base.scss';
@@ -21,11 +21,11 @@ export default class Routes extends React.Component {
 
   render() {
     return (
-      <BrowserRouter>
+      <Router history={history}>
         <div id="app-container">
           {this.state.routes}
         </div>
-      </BrowserRouter>
+      </Router>
     );
   }
 }

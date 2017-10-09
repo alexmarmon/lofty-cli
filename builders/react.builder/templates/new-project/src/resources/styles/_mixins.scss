@@ -45,3 +45,15 @@
 		src: $src;
 	}
 }
+
+@mixin containImage() {
+	background-position: center center;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+@mixin coverImage() {
+	background-position: center center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
