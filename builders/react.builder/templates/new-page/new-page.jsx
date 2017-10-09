@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import AppState from '../state/AppState.jsx';
+import AppState from 'state/AppState.jsx';
 // import modules here
 
 export default class {{pageName}} extends React.Component {
