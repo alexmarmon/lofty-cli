@@ -239,7 +239,7 @@ class Builder {
       const tasks = new Listr([
         {
           title: 'Create module from template',
-          task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-module'), `./${path.join(this.fileTree.root.src.modules, `/${moduleName}/`)}`, answers, {'new-module': `${moduleName}`})
+          task: () => this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-module'), `./${path.join(this.fileTree.root.src.modules, `/${moduleName}/`)}`, data, {'new-module': `${moduleName}`})
         }
       ]);
 
