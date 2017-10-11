@@ -286,7 +286,9 @@ class Builder {
   page(){
     return new Promise((resolve) => {
       inquirer.prompt(this.prompts.page).then((answers) => {
-        return this.pageWithInfo(answers);
+        this.pageWithInfo(answers).then((data) => {
+          resolve(data);
+        });
       }).catch(err => console.log(err));
     });
   }

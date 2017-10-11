@@ -53,6 +53,7 @@ class ReactBuilder extends Builder{
   page(){
     return new Promise(resolve => {
       super.page().then((data) => {
+        console.log('injecting router');
         // Inject the page info into the router
         this.injectRouter(path.join('./', this.fileTree.root.src.dir, '/routes.jsx'), data.answers.name, data.answers.pageName, data.answers.path);
         resolve(data);
