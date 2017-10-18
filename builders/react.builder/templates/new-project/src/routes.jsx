@@ -4,7 +4,7 @@ import AppState from './state/AppState';
 // import styles
 import './resources/styles/base.scss';
 // import pages
-import Home from './pages/Home';
+
 
 // create global state
 const appState = new AppState();
@@ -14,7 +14,6 @@ export default class Routes extends React.Component {
     super(props);
     this.state = {
       routes: [
-        <Route exact path="/" key="home" component={() => <Home state={appState} />} />,
       ],
     };
   }
