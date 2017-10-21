@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "babel-core": "^6.26.0",
     "chalk": "^2.1.0",
     "execa": "^0.8.0",
     "fs-extra": "^4.0.1",
@@ -18,10 +19,19 @@
     "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.9.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.7.0",
     "has-flag": "^2.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --ext .js --ignore-pattern 'builders/*/templates/*' ./; exit 0",
+    "lint-fix": "eslint --fix --ext .js --ignore-pattern 'builders/*/templates/*' ./; exit 0"
   },
   "author": "",
   "license": "ISC",
