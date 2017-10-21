@@ -19,7 +19,7 @@
 
 
 // font-face
-@mixin font-face($name, $path, $weight: null, $style: null, $exts: eot woff2 woff ttf svg) {
+@mixin font-face($name, $path, $weight: normal, $style: normal, $exts: eot woff2 woff ttf svg) {
 	$src: null;
 
 	$extmods: (
@@ -39,8 +39,8 @@
 	}
 
 	@font-face {
-		font-family: quote($name);
-		font-style: $style;
+		font-family: $name;
+		font-style: quote($style);
 		font-weight: $weight;
 		src: $src;
 	}
