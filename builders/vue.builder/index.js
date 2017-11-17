@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
-const Builder = require('../builder');
+const Builder = require('../builder.js');
 
 class VueBuilder extends Builder {
   constructor() {

@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
-const Builder = require('../builder');
+const Builder = require('../builder.js');
 
 class ReactBuilder extends Builder {
   constructor() {
@@ -17,8 +17,10 @@ class ReactBuilder extends Builder {
   //   :::::: P R O J E C T : :  :   :    :     :        :          :
   // ────────────────────────────────────────────────────────────────
   //
-  // Generates a new Vue project. Must return a promise.
+  // Generates a new React project. Must return a promise.
   project = () => new Promise((resolve) => {
+    console.log('react project');
+    console.log(super.project);
     super.project().then((data) => {
       resolve(data);
     });
@@ -29,7 +31,7 @@ class ReactBuilder extends Builder {
   //   :::::: M O D U L E : :  :   :    :     :        :          :
   // ──────────────────────────────────────────────────────────────
   //
-  // Generates a new Vue module. Must return a promise.
+  // Generates a new React module. Must return a promise.
   module = () => new Promise((resolve) => {
     super.module().then((data) => {
       resolve(data);
@@ -41,7 +43,7 @@ class ReactBuilder extends Builder {
   //   :::::: P A G E : :  :   :    :     :        :          :
   // ──────────────────────────────────────────────────────────
   //
-  // Generates a new Vue page. Must return a promise.
+  // Generates a new React page. Must return a promise.
   page = () => new Promise((resolve) => {
     super.page().then((data) => {
       console.log('injecting router');

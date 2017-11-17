@@ -6,18 +6,15 @@ const path = require('path');
 const cmd = require('node-cmd');
 const Logger = require('../util/logger.js');
 const projectInfo = require('./projectInfo.js');
+const builderInfo = require('./builderInfo.js');
 const updateStage = require('./updateStage.js');
 
 class CLI {
   constructor() {
-    // Builders
-    this.builders = {};
-    this.builderPostfix = '.builder';
     const builderDirectory = path.join(__dirname, '../builders/');
-    this.generateBuildersFromFolder(builderDirectory).then(() => {
-      // BEGIN
+    builderInfo.generateBuildersFromFolder(builderDirectory).then(() => {
       this.greet();
-    });
+    })
   }
 
   greet = () => {
@@ -101,60 +98,6 @@ class CLI {
     cmd.run('npm run dev');
   }
 
-  generateBuildersFromFolder = buildersPath => new Promise((resolve) => {
-    // Get all the available framework builders stored in the `buildersPath` directory
-    this.getAvailableFrameworks(buildersPath).then((frameworks) => {
-      for (let i = 0; i < frameworks.length; i += 1) {
-        const frameworkPath = frameworks[i].buildersPath;
-        const name = _.lowerCase(frameworks[i].name);
-
-        // Check to see if there's an index.js file in our folder
-        if (fs.existsSync(`${frameworkPath}/index.js`)) {
-          // Load the framework builder
-          const framework = require(frameworkPath); // eslint-disable-line
-
-          // If we successfully imported a constructor function
-          //  from the builder directory
-          if (typeof framework === 'function') {
-            const builderObject = new framework(); // eslint-disable-line
-            // Is the builder inheriting from the builder.js superclass?
-            if (builderObject.isBuilder) {
-              this.builders[name] = new framework(); // eslint-disable-line
-            } else {
-              Logger.logError(`It looks like the builder in ${frameworkPath} is not a subclass of Builder in builder.js. You should probs fix that.`);
-            }
-          }
-          // There was a problem with the builder class
-          else {
-            Logger.logError(`There was an issue with the builder in ${frameworkPath}. This could be due to the class not being exported (module.exports = BuilderName).`);
-          }
-        }
-        // There was a problem with the builder directory
-        else {
-          Logger.logError(`There was an issue with the builder in ${frameworkPath}. This could be due to a missing index.js file.`);
-        }
-      }
-
-      resolve();
-    });
-  })
-
-  getAvailableFrameworks = buildersPath => new Promise((resolve) => {
-    const frameworks = [];
-    projectInfo.getDirectories(buildersPath).then((files) => {
-      for (let i = 0; i < files.length; i += 1) {
-        const file = files[i];
-        // Check to see if there's a directory for the framework we want
-        if (file.includes(this.builderPostfix)) {
-          let frameworkName = file.replace(this.builderPostfix, '');
-          frameworkName = _.capitalize(frameworkName);
-          frameworks.push({ name: frameworkName, buildersPath: `${buildersPath}${file}` });
-        }
-        resolve(frameworks);
-      }
-    });
-  })
-
   project = () => {
     // Check to see if there's a project already in the current directory.
     //  Even though we're gonna create a sub folder for the project,
@@ -173,8 +116,8 @@ class CLI {
           default: false,
         }).then((ans) => {
           if (ans.proceed) {
-            this.getFramework().then((which) => {
-              this.builders[which].project().then(() => {
+            projectInfo.getFramework().then((builder) => {
+              builder.project().then(() => {
                 this.menu();
               });
             });
@@ -185,8 +128,9 @@ class CLI {
       //  (or at least there isn't a package.json file...)
       //  so we can create a new project
       else {
-        this.getFramework().then((which) => {
-          this.builders[which].project().then(() => {
+        projectInfo.getFramework().then((builder) => {
+          console.log('trying project');
+          builder.project().then(() => {
             this.menu();
           });
         });
