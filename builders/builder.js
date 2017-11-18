@@ -167,7 +167,6 @@ class Builder {
       });
     })
   }
-  
 
   getDirectories = source => new Promise((resolve) => {
     resolve(fs.readdirSync(source));
@@ -349,7 +348,6 @@ class Builder {
         type: 'input',
         name: 'name',
         message: 'Project name?',
-        // default: () => ('new-project'),
         default: () => path.basename(path.resolve('./')),
       }, {
         type: 'input',
