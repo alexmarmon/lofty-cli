@@ -176,7 +176,6 @@ class Builder {
   // Generates a new project. Must be implemented by subclass.
   project () {
     return new Promise((resolve) => {
-      console.log('project time');
       // If you want to extend this project function, insert new prompts into `this.prompts.project`,
       //  which will update the questions asked and the `answers` variable.
       //  You can also call super.project().then((data)=>{}) in the subclass to do more actions after
@@ -223,7 +222,6 @@ class Builder {
       });
     })
   }
-    
 
   moduleWithInfo = data => new Promise((resolve) => {
     // Format the name of the module
@@ -256,7 +254,6 @@ class Builder {
       }).catch(err => console.log(err));
     })
   }
-  
 
   // Create page without user prompts
   pageWithInfo = (data, projectRoot = '.') => new Promise((resolve) => {

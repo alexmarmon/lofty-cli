@@ -19,8 +19,6 @@ class ReactBuilder extends Builder {
   //
   // Generates a new React project. Must return a promise.
   project = () => new Promise((resolve) => {
-    console.log('react project');
-    console.log(super.project);
     super.project().then((data) => {
       resolve(data);
     });
