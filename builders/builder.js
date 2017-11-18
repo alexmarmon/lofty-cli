@@ -184,17 +184,23 @@ class Builder {
         answers.framework = this.frameworkName;
         // Format the name of the project
         const projectName = _.kebabCase(answers.name);
-        const projectDirectory = `./${answers.name}`;
+        let projectDirectory = `./${answers.name}/`;
+
+        if (answers.name === path.basename(path.resolve('./'))) {
+          // scaffold into current folder
+          projectDirectory = `./`;
+        }
+
         // Create tasks array
         const tasks = new Listr([
           {
             // Create new directory
             title: `Create file tree for ${projectName}`,
-            task: () => this.buildDefaultFileTree(projectName),
+            task: () => this.buildDefaultFileTree(projectDirectory),
           }, {
             title: 'Create project from template',
             task: () => {
-              this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-project'), `./${projectName}`, answers)
+              this.buildFilesFromTemplate(path.join(this.templateFolder, 'new-project'), projectDirectory, answers)
                 .then(this.pageWithInfo({ name: 'Home' }, projectDirectory))
                 .then(() => {
                   // If the subclass implements the 'injectRouter' method
@@ -210,7 +216,7 @@ class Builder {
         if (answers.npm) {
           tasks.add({
             title: 'Npm install',
-            task: () => execa('npm', ['install'], { cwd: path.resolve(`./${_.kebabCase(answers.name)}`) }),
+            task: () => execa('npm', ['install'], { cwd: path.resolve(projectDirectory) }),
           });
         }
 
@@ -290,21 +296,21 @@ class Builder {
   getFileTree = (root = '') => ({
     root: {
       dir: `${root}`,
-      config: `${root}/config/`,
-      api: `${root}/api/`,
+      config: `${root}config/`,
+      api: `${root}api/`,
       src: {
-        dir: `${root}/src/`,
-        pages: `${root}/src/pages/`,
-        modules: `${root}/src/modules/`,
-        state: `${root}/src/state/`,
-        tests: `${root}/src/tests/`,
+        dir: `${root}src/`,
+        pages: `${root}src/pages/`,
+        modules: `${root}src/modules/`,
+        state: `${root}src/state/`,
+        tests: `${root}src/tests/`,
         resources: {
-          dir: `${root}/src/resources/`,
-          scripts: `${root}/src/resources/scripts/`,
-          styles: `${root}/src/resources/styles/`,
+          dir: `${root}src/resources/`,
+          scripts: `${root}src/resources/scripts/`,
+          styles: `${root}src/resources/styles/`,
           assets: {
-            dir: `${root}/src/resources/assets/`,
-            fonts: `${root}/src/resources/assets/fonts/`,
+            dir: `${root}src/resources/assets/`,
+            fonts: `${root}src/resources/assets/fonts/`,
           },
         },
       },
@@ -317,11 +323,11 @@ class Builder {
     for (let i = 0; i < keys.length; i += 1) {
       const pathName = fileTreeObject[keys[i]];
       // If the pathName is a string, create the pathName
-      if (typeof pathName === 'string' && pathName !== '/') {
+      if (typeof pathName === 'string') {
         if (!fs.existsSync(`${pathName}`)) {
           fs.mkdirSync(pathName);
           // Logger.logSuccess(`Created ${pathName}`);
-        } else {
+        } else if (pathName !== './') {
           Logger.logError(`Directory ${pathName} already exists`);
         }
       }
@@ -343,7 +349,8 @@ class Builder {
         type: 'input',
         name: 'name',
         message: 'Project name?',
-        default: () => ('new-project'),
+        // default: () => ('new-project'),
+        default: () => path.basename(path.resolve('./')),
       }, {
         type: 'input',
         name: 'description',
