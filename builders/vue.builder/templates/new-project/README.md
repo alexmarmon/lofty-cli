@@ -1,54 +1,33 @@
-{{name}}
-=====================
+# vue template
 
-An application that combines:
+> A Vue.js project
 
-* [Node](https://nodejs.org/api/v8.html) Version: ^8.0.0
-* [Vue](https://github.com/vuejs/vue) Version: ^2.4.2
-* [Vuex](https://github.com/vuejs/vuex) Version ^2.4.0
-* [Vue Router](https://github.com/vuejs/vue-router) Version ^2.7.0
-* [Webpack 3](https://github.com/webpack/webpack.js.org) Version: ^3.5.6
-* [Airbnb's ESLint](https://github.com/airbnb/javascript) Version: ^11.3.2
-* [Express](https://expressjs.com/) Version: ^4.15.4
+## Build Setup
 
-### Getting Started
-```
-vim creds.json
-{
-  "host": "localhost",
-  "user": "mysql user",
-  "password": "mysql password",
-  "database": "{{name}}"
-}
+``` bash
+# install dependencies
+npm install
 
-// in mysql
-create database {{name}};
-
-mysql -u [user] -p {{name}} < /path/to/this/repo/api/{{name}}.sql
-```
-
-### Run It
-```
+# serve with hot reload at localhost:3000
 npm run dev
-```
 
-### Run Lint
-```
-npm run lint
-npm run lint-fix
-```
-
-### Run Tests
-```
-npm run test
-```
-
-### Build Production Files
-```
+# build for production with minification
 npm run build
+
+# build for production and view the bundle analyzer report
+npm run build --report
+
+# run unit tests
+npm run unit
+
+# run e2e tests
+npm run e2e
+
+# run all tests
+npm test
+
+# build 2dkit games
+npm run build-games
 ```
 
-### Serve Production Files
-```
-npm run production
-```
+For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).

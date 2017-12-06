@@ -1,0 +1,13 @@
+
+// These are utility classes used to support utility jade mixins. They should
+// all begin with ".util-" for consistency.
+
+.util-center-vertical {
+  display: table;
+  height: 100%;
+  width: 100%;
+  &__inner {
+    display: table-cell;
+    vertical-align: middle;
+  }
+}

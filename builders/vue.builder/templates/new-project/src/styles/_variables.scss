@@ -1,0 +1,84 @@
+
+// COLORS
+
+$white:           #ffffff;
+$gray90:          #e5e5e5;
+$gray80:          #cccccc;
+$gray70:          #b2b2b2;
+$gray60:          #999999;
+$gray50:          #7f7f7f;
+$gray40:          #666666;
+$gray30:          #4c4c4c;
+$gray20:          #333333;
+$gray10:          #191919;
+$black:           #000000;
+$brandPrimary:    #42b983;
+$brandLight:      lighten($brandPrimary, 10%);
+$brandDark:       darken($brandPrimary, 10%);
+
+$siteDark:        #070707;
+$siteSubtle:      $gray90;
+
+$defaultTextColor: $black;
+$linkColor: $brandLight;
+$linkColorHover: $brandDark;
+
+// TYPOGRAPHY
+
+$h1: 4em;
+$h2: 3em;
+$h3: 2em;
+$h4: 1.5em;
+$h5: 1em;
+$h6: 0.5em;
+
+$baseScale: 1.0;
+
+$baseLineHeight: 1.25 !default;
+$baseFontFamily: "RBNo21a", sans-serif;
+$headingsFontFamily: "RBNo21a", sans-serif;
+
+$bodyFontLightWeight: 300;
+$bodyFontNormalWeight: 800;
+$bodyFontBoldWeight: 900;
+$headingLightWeight: 300;
+$headingNormalWeight: 300;
+$headingBoldWeight: 900;
+
+// TRANSITIONS
+
+$transitionSuperslow:   0.5s;
+$transitionSlower:      0.4s;
+$transitionSlow:        0.3s;
+$transitionSlowish:     0.25s;
+$transitionNormal:      0.2s;
+$transitionFast:        0.15s;
+$transitionFaster:      0.10s;
+$transitionSuperfast:   0.05s;
+$transitionFastest:     0.025s;
+
+// Z-INDEX
+
+$zTopLevel: 400;
+$zSetForward: 300;
+$zMiddle: 200;
+$zBottomLevel: 100;
+
+// GRID
+$grid-num-cols: 12;
+
+// these are based on Salesforce documentation
+$grid-mobile-breakpoint: 720px;
+$grid-tablet-breakpoint: 980px;
+$grid-max-width: 1140px;
+
+$mobile: "only screen and (max-width : #{$grid-mobile-breakpoint})";
+$tablet: "only screen and (max-width : #{$grid-tablet-breakpoint})";
+$tablet-only: "only screen and (min-width : #{$grid-mobile-breakpoint + 1}) and (max-width : #{$grid-tablet-breakpoint})";
+$desktop: "only screen and (min-width : #{$grid-tablet-breakpoint + 1})";
+$desktop-max: "only screen and (min-width: #{$grid-max-width})";
+$retina: "(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)";
+
+// EASING
+
+@import "_easings";

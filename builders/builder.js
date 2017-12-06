@@ -5,7 +5,7 @@ const execa = require('execa');
 const _ = require('lodash');
 const fs = require('fs-extra');
 const handlebars = require('handlebars');
-const Logger = require('../util/logger.js');
+const { Logger } = require('../util');
 
 class Builder {
   constructor() {
@@ -77,7 +77,6 @@ class Builder {
       });
     });
   }
-  
 
   // @param Template path is the path to the folder containing templates (i.e. new-project, new-page, new-module... etc.)
   // @param nameMaps is an object that maps the template file name to the filename that you want.
@@ -89,7 +88,7 @@ class Builder {
       this.getDirectories(templatePath).then((directories) => {
         let filesBuilt = 0;
         let directoriesBuilt = 0;
-  
+
         // Get total number of files and directories inside folder
         let numDirectories = 0;
         let numFiles = 0;
@@ -101,17 +100,17 @@ class Builder {
             numFiles += 1;
           }
         }
-  
+
         // To make our lives easier for checking if we need to resolve
         function resolveIfNeeded() {
           if (filesBuilt === numFiles && directoriesBuilt === numDirectories) {
             resolve();
           }
         }
-  
+
         for (let i = 0; i < directories.length; i += 1) {
           const directory = directories[i];
-  
+
           // Skip over some useless files
           const filesToIgnore = ['.DS_Store', '.ttf'];
           let shouldSkipFile = false;
@@ -121,7 +120,7 @@ class Builder {
               shouldSkipFile = true;
             }
           }
-  
+
           // If we have a valid file
           if (!shouldSkipFile) {
             // Check if it's a file. If it is, we build the template
@@ -134,7 +133,7 @@ class Builder {
                 // Use Regex to replace the template name with the new file name (maintaining the template extension)
                 filename = filename.replace(fileInfo.fullName, `${nameMaps[fileInfo.name]}.${fileInfo.extension}`);
               }
-  
+
               this.buildFromTemplate(destPath, path.join(templatePath, directory), filename, data)
                 .then(() => { // eslint-disable-line
                   // Make sure we finish making all the files in the directory before resolving
@@ -158,7 +157,7 @@ class Builder {
             }
           }
         }
-  
+
         // If there's nothing in the folder, we still want to resolve
         if (directories.length === 0) {
           // console.log('resolving 0 directories');
@@ -204,7 +203,7 @@ class Builder {
                 .then(() => {
                   // If the subclass implements the 'injectRouter' method
                   if (typeof this.injectRouter === 'function') {
-                    this.injectRouter(path.join(projectDirectory, this.fileTree.root.src.dir, '/routes.jsx'), 'Home', 'Home', '');
+                    this.injectRouter(path.join(projectDirectory, this.fileTree.root.src.dir, '/routes.js'), 'Home', 'Home', '');
                   }
                 });
             },
@@ -290,7 +289,6 @@ class Builder {
       }).catch(err => console.log(err));
     })
   }
-  
 
   getFileTree = (root = '') => ({
     root: {

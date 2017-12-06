@@ -1,7 +1,8 @@
 {
-  "name": "@lofty/lofty-cli",
-  "version": "0.1.1",
+  "name": "@14four/14four-cli",
+  "version": "0.0.1",
   "description": "",
+  "author": "",
   "main": "index.js",
   "dependencies": {
     "babel-core": "^6.26.0",
@@ -33,9 +34,8 @@
     "lint": "eslint --ext .js --ignore-pattern 'builders/*/templates/*' ./; exit 0",
     "lint-fix": "eslint --fix --ext .js --ignore-pattern 'builders/*/templates/*' ./; exit 0"
   },
-  "author": "",
   "license": "ISC",
   "bin": {
-    "lofty": "./index.js"
+    "14four": "./index.js"
   }
 }

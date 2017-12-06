@@ -1,0 +1,19 @@
+@import "_variables";
+@import "_mixins";
+
+html, body {
+  background: $white;
+}
+
+h1, h2, h3, h4, h5, h6, .t1, .t2, .t3, .t4, .t5, .t6 {
+  font-weight: 400;
+  padding: 30px;
+}
+
+.overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
