@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const _ = require('lodash');
-import Common from './common';
+import FileIO from './fileIO';
 
 class BuilderInfo {
   constructor () {
@@ -48,7 +48,7 @@ class BuilderInfo {
 
   getAvailableFrameworks = buildersPath => new Promise((resolve) => {
     const frameworks = [];
-    Common.getDirectories(buildersPath).then((files) => {
+    FileIO.getDirectories(buildersPath).then((files) => {
       for (let i = 0; i < files.length; i += 1) {
         const file = files[i];
         // Check to see if there's a directory for the framework we want

@@ -1,13 +1,13 @@
 const fs = require('fs-extra');
 const _ = require('lodash');
 const inquirer = require('inquirer');
-const Common = require('./common');
+const FileIO = require('./fileIO');
 const BuilderInfo = require('./builderInfo');
 const Logger = require('./logger');
 
 class ProjectInfo {
   get = () => new Promise((resolve) => {
-    Common.getDirectories('./').then((directories) => {
+    FileIO.getDirectories('./').then((directories) => {
       // If we've got a package.json file in
       if (directories.indexOf('package.json') > -1) {
         const json = fs.readFileSync('./package.json', 'utf8');

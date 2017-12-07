@@ -1,9 +1,13 @@
 {
-  "name": "vue-template",
+  "name": "<%= name %>",
   "version": "1.0.0",
-  "description": "A Vue.js project",
+  "description": "<%= description %>",
   "private": true,
   "config": {},
+  "repository": {
+    "type": "git",
+    "url": "<%= repo %>"
+  },
   "scripts": {
     "dev": "node build/dev-server.js",
     "build": "node build/build.js",

@@ -1,11 +1,13 @@
 const Logger = require('./logger');
-const Common = require('./common');
+const FileIO = require('./fileIO');
+const Naming = require('./naming');
 const BuilderInfo = require('./builderInfo');
 const ProjectInfo = require('./projectInfo');
 
 module.exports = {
   Logger,
-  Common,
+  FileIO,
+  Naming,
   BuilderInfo,
   ProjectInfo
 }

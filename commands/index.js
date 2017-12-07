@@ -5,7 +5,7 @@ const inquirer = require('inquirer');
 const path = require('path');
 const cmd = require('node-cmd');
 const updateStage = require('./updateStage.js');
-// const buildProject = require('./buildProject.js');
+const buildProject = require('./buildProject.js');
 const buildModule = require('./buildModule.js');
 const { BuilderInfo, ProjectInfo, Logger } = require('../util')
 
@@ -73,8 +73,8 @@ class CLI {
         switch (answer.main) {
           case options.project:
             // this.project();
-            // buildProject.run()
-            buildModule.run()
+            buildProject.run()
+            // buildModule.run()
             break;
           case options.page:
             this.page();
