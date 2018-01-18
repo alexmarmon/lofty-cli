@@ -1,0 +1,191 @@
+@import "_variables";
+
+// strip units from any number. "50px" returns 50.
+@function strip-units($number) {
+  @return $number / ($number * 0 + 1);
+}
+
+// convert px to em, with regard to its context. Most context will be 16px.
+@function px-em($pxFont, $context:16){
+  @return (strip-units($pxFont) / strip-units($context)) + 0em;
+}
+
+// Webkit-style focus
+// ------------------
+@mixin tab-focus() {
+  // Default
+  outline: thin dotted #333;
+  // Webkit
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+
+// Center-align a block level element
+// ----------------------------------
+@mixin center-block() {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// Center-align a relative/absolute element
+// ----------------------------------
+@mixin center-position($width, $position:absolute) {
+  width: $width;
+  left: 50%;
+  margin-left: -$width / 2;
+  position: $position;
+}
+
+// Center-align an absolute elemete
+// ----------------------------------
+@mixin center-absolute($width) {
+  @include center-position($width, absolute);
+}
+
+// Center-align an absolute elemete
+// ----------------------------------
+@mixin center-relative($width) {
+  @include center-position($width, relative);
+}
+
+// Sizing shortcuts
+// -------------------------
+@mixin size($width, $height) {
+  width: $width;
+  height: $height;
+}
+
+@mixin square($size) {
+  @include size($size, $size);
+}
+
+// Placeholder text
+// -------------------------
+@mixin placeholder($color: $placeholderText) {
+  &:-moz-placeholder {
+  color: $color;
+  }
+  &:-ms-input-placeholder {
+  color: $color;
+  }
+  &::-webkit-input-placeholder {
+  color: $color;
+  }
+}
+
+// FONTS
+// --------------------------------------------------
+
+
+@mixin font($fontFamily:$baseFontFamily, $fontWeight: normal, $fontStyle: normal){ // this is a utility mixin for use by the actual font mixins below. You shouldn't use it.
+  font-family: $fontFamily;
+  font-weight: $fontWeight;
+  font-style: $fontStyle;
+}
+
+@mixin fontRegular(){
+  @include font($baseFontFamily, $bodyFontNormalWeight);
+}
+
+@mixin fontLight(){
+  @include font($baseFontFamily, $bodyFontLightWeight);
+}
+
+@mixin fontItalic(){
+  @include font($baseFontFamily, $bodyFontNormalWeight, italic);
+}
+
+@mixin fontBold(){
+  @include font($baseFontFamily, $bodyFontBoldWeight);
+}
+
+@mixin fontBoldItalic(){
+  @include font($baseFontFamily, $bodyFontBoldWeight, italic);
+}
+
+@mixin fontHeading($size){
+  font-size: px-em($size);
+  @include font($headingsFontFamily, $headingNormalWeight);
+}
+
+@mixin fontHeadingLight($size){
+  font-size: px-em($size);
+  @include font($headingsFontFamily, $headingLightWeight);
+}
+
+@mixin fontHeadingBold($size){
+  font-size: px-em($size);
+  @include font($headingsFontFamily, $headingBoldWeight);
+}
+
+@mixin em-strong($font: Regular){
+  @if ($font == Regular){
+    em { @include fontItalic; }
+    strong { @include fontBold; }
+    em strong, strong em { @include fontBoldItalic; }
+  } @else if ($font == Bold) {
+    em, em strong, strong em { @include fontBoldItalic; }
+    strong { @include fontBold; }
+  }
+}
+
+@mixin iconFontBaseStyles($fontName) {
+  font-family: $fontName;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  display: block;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@mixin opacity($opacity) {
+  filter: alpha(opacity=$opacity);
+  opacity: $opacity / 100;
+}
+
+@mixin absoluteFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+// @extend this microfix for clearfix
+@mixin microfix() {
+
+  /**
+   * For modern browsers
+   * 1. The space content is one way to avoid an Opera bug when the
+   *    contenteditable attribute is included anywhere else in the document.
+   *    Otherwise it causes space to appear at the top and bottom of elements
+   *    that are clearfixed.
+   * 2. The use of `table` rather than `block` is only necessary if using
+   *    `:before` to contain the top-margins of child elements.
+   */
+  &:before,
+  &:after {
+      content: " "; /* 1 */
+      display: table; /* 2 */
+  }
+
+  &:after {
+      clear: both;
+  }
+
+  /**
+   * For IE 6/7 only
+   * Include this rule to trigger hasLayout and contain floats.
+   */
+  & {
+      *zoom: 1;
+  }
+
+}

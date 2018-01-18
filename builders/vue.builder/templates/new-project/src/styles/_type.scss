@@ -1,0 +1,156 @@
+@import "_variables";
+@import "_mixins";
+
+//
+// Typography
+// --------------------------------------------------
+// Customize this to meet your project needs
+
+
+// Body text
+// -------------------------
+
+html {
+  font-size: 3.0vh; // 16px @ $grid-max-width of 1140px wide = 1.4vw
+
+  @media #{$desktop-max} {
+    // font-size: 16px; // limit font-size at widths larger than $grid-max-width
+  }
+
+  @media (max-width: px-em($grid-mobile-breakpoint)) {
+  }
+}
+
+body {
+  @include fontRegular;
+  color: $defaultTextColor;
+  line-height: $baseLineHeight;
+}
+
+p {
+  font-family: $baseFontFamily;
+  font-weight: 200;
+  font-style: normal;
+  b, strong {
+    font-weight: 500;
+    & em {
+      font-style: italic;
+    }
+  }
+  em {
+    font-style: italic;
+    & b, & strong {
+      font-weight: 700;
+    }
+  }
+
+}
+
+strong {
+  font-weight: bold;
+}
+
+// Links
+// -------------------------
+
+a {
+  color: $linkColor;
+  text-decoration: none;
+  transition: color $transitionFast linear;
+}
+a:hover,
+a:active,
+a:focus {
+  color: $linkColorHover;
+  text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6, .t1, .t2, .t3, .t4, .t5, .t6 {
+  text-rendering: optimizeLegibility; // disable this if we have performance issues.
+  -webkit-font-smoothing: antialiased;
+  font-style: normal;
+  line-height: 1em;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $headingsFontFamily;
+  font-weight: $headingNormalWeight;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.t1, .t2, .t3, .t4, .t5, .t6 {
+  font-weight: 500;
+  &.tl {
+    font-weight: 200;
+  }
+}
+
+.t {
+  text-rendering: optimizeLegibility; // disable this if we have performance issues.
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 1px;
+}
+
+h1 {
+  font-size: $h1;
+}
+h2 {
+  font-size: $h2;
+}
+h3 {
+  font-size: $h3;
+}
+h4 {
+  font-size: $h4;
+}
+h5 {
+  font-size: $h5;
+}
+h6 {
+  font-size: $h6;
+}
+
+.t1 {
+  font-size: $h1 * $baseScale;
+}
+.t2 {
+  font-size: $h2 * $baseScale;
+}
+.t3 {
+  font-size: $h3 * $baseScale;
+}
+.t4 {
+  font-size: $h4 * $baseScale;
+}
+.t5 {
+  font-size: $h5 * $baseScale;
+}
+.t6 {
+  font-size: $h6 * $baseScale;
+}
+
+.p1, .p2, .p3 {
+  font-weight: 200;
+}
+
+p, .p1 {
+  font-size: px-em(29px * $baseScale);
+  line-height: px-em(40px * $baseScale, 29px * $baseScale);
+  margin-bottom: px-em(29px * $baseScale, 29px * $baseScale);
+}
+
+.p2 {
+  font-size: px-em(25px * $baseScale);
+  line-height: px-em(34px * $baseScale, 25px * $baseScale);
+  margin-bottom: px-em(34px * $baseScale, 25px * $baseScale);
+}
+
+.p3 {
+  font-size: px-em(16px * $baseScale);
+  line-height: px-em(22px * $baseScale, 16px * $baseScale);
+  margin-bottom: px-em(16px * $baseScale, 16px * $baseScale);
+}

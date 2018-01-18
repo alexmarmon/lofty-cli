@@ -1,0 +1,12 @@
+@import "_variables";
+@import "_mixins";
+
+::-moz-selection { background: $black; color: $white; }
+::selection { background: $black; color: $white; }
+
+::placeholder { color: $siteSubtle; }
+::-webkit-input-placeholder { color: $siteSubtle; }
+::-moz-placeholder { color: $siteSubtle; }
+:-ms-input-placeholder { color: $siteSubtle; }
+:-moz-placeholder { color: $siteSubtle; }
+

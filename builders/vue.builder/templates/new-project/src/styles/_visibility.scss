@@ -1,0 +1,22 @@
+@import "_variables";
+@import "_mixins";
+
+.visibility-desktop, .visibility-tablet, .visibility-mobile {
+  display: none;
+}
+
+@media #{$desktop} {
+  .visibility-desktop {
+    display: block;
+  }
+}
+@media #{$tablet-only} {
+  .visibility-tablet {
+    display: block;
+  }
+}
+@media #{$mobile} {
+  .visibility-mobile {
+    display: block;
+  }
+}

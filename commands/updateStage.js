@@ -4,7 +4,7 @@ const inquirer = require('inquirer');
 const cmd = require('node-cmd');
 const exec = require('ssh-exec');
 const Listr = require('listr');
-const projectInfo = require('./projectInfo.js');
+const { ProjectInfo } = require('../util');
 
 class UpdateStage {
   run = (message = '') => new Promise((resolve) => {

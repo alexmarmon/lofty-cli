@@ -1,0 +1,135 @@
+
+////
+/// CSS cubic-bezier easing functions
+/// @group animation
+////
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInSine Easing Cheat Sheet Preview
+
+$easeInSine: cubic-bezier(0.47, 0, 0.745, 0.715);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutSine Easing Cheat Sheet Preview
+
+$easeOutSine: cubic-bezier(0.39, 0.575, 0.565, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutSine Easing Cheat Sheet Preview
+
+$easeInOutSine: cubic-bezier(0.39, 0.575, 0.565, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInQuad Easing Cheat Sheet Preview
+
+$easeInQuad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutQuad Easing Cheat Sheet Preview
+
+$easeOutQuad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutQuad Easing Cheat Sheet Preview
+
+$easeInOutQuad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInCubic Easing Cheat Sheet Preview
+
+$easeInCubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutCubic Easing Cheat Sheet Preview
+
+$easeOutCubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutCubic Easing Cheat Sheet Preview
+
+$easeInOutCubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInQuart Easing Cheat Sheet Preview
+
+$easeInQuart: cubic-bezier(0.895, 0.03, 0.685, 0.22);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutQuart Easing Cheat Sheet Preview
+
+$easeOutQuart: cubic-bezier(0.165, 0.84, 0.44, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutQuart Easing Cheat Sheet Preview
+
+$easeInOutQuart: cubic-bezier(0.165, 0.84, 0.44, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInQuint Easing Cheat Sheet Preview
+
+$easeInQuint: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutQuint Easing Cheat Sheet Preview
+
+$easeOutQuint: cubic-bezier(0.23, 1, 0.32, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutQuint Easing Cheat Sheet Preview
+
+$easeInOutQuint: cubic-bezier(0.23, 1, 0.32, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInExpo Easing Cheat Sheet Preview
+
+$easeInExpo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutExpo Easing Cheat Sheet Preview
+
+$easeOutExpo: cubic-bezier(0.19, 1, 0.22, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutExpo Easing Cheat Sheet Preview
+
+$easeInOutExpo: cubic-bezier(0.19, 1, 0.22, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInCirc Easing Cheat Sheet Preview
+
+$easeInCirc: cubic-bezier(0.6, 0.04, 0.98, 0.335);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutCirc Easing Cheat Sheet Preview
+
+$easeOutCirc: cubic-bezier(0.075, 0.82, 0.165, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutCirc Easing Cheat Sheet Preview
+
+$easeInOutCirc: cubic-bezier(0.075, 0.82, 0.165, 1);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInBack Easing Cheat Sheet Preview
+
+$easeInBack: cubic-bezier(0.6, -0.28, 0.735, 0.045);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeOutBack Easing Cheat Sheet Preview
+
+$easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+/// @type cubic-bezier
+/// @link http://easings.net/#easeInOutBack Easing Cheat Sheet Preview
+
+$easeInOutBack: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+/// Custom easing with fast ease in and fast ease out.
+/// @type cubic-bezier
+
+$easeInOutFast: cubic-bezier(1,0,0,1);
+
+/// Custom authentic motion easing with quick ease in and slower ease out.
+/// @type cubic-bezier
+
+$easeAuthenticMotion: cubic-bezier(0.4,0,0.2,1);

@@ -1,13 +1,15 @@
 {
   "name": "@lofty/lofty-cli",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "description": "",
+  "author": "",
   "main": "index.js",
   "dependencies": {
     "babel-core": "^6.26.0",
     "chalk": "^2.1.0",
     "execa": "^0.8.0",
     "fs-extra": "^4.0.1",
+    "glob": "^7.1.2",
     "handlebars": "^4.0.10",
     "inquirer": "^3.2.1",
     "json5": "^0.5.1",
@@ -33,7 +35,6 @@
     "lint": "eslint --ext .js --ignore-pattern 'builders/*/templates/*' ./; exit 0",
     "lint-fix": "eslint --fix --ext .js --ignore-pattern 'builders/*/templates/*' ./; exit 0"
   },
-  "author": "",
   "license": "ISC",
   "bin": {
     "lofty": "./index.js"

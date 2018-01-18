@@ -1,6 +1,5 @@
 const chalk = require('chalk');
 
-
 class Logger {
   constructor() {
     this.specialCharacters = this.getSpecialCharacters();
@@ -16,9 +15,7 @@ class Logger {
     verticalLine: '║',
   })
 
-  box(arg = {
-    minWidth: 0, minHeight: 0, linesOfText: [], sidePadding: 0, verticalPadding: 0, padding: 0,
-  }) {
+  box(arg = { minWidth: 0, minHeight: 0, linesOfText: [], sidePadding: 0, verticalPadding: 0, padding: 0 }) {
     const sidePadding = arg.sidePadding || arg.padding || 0;
     const verticalPadding = arg.verticalPadding || arg.padding || 0;
     let verticalMiddle = 0;
@@ -133,23 +130,19 @@ class Logger {
     return returnString;
   }
 
-  //
-  // STRING CREATION
-  //
-
   title = (string, numStars = 4) => (chalk.blue(chalk.bold(`${'*'.repeat(numStars)} ${string} ${'*'.repeat(numStars)}`)))
 
   error = string => (`🔥🔥 ${chalk.red(string)} 🔥🔥`)
 
   success = string => (`👍 ${chalk.green(string)}`)
 
-  //
-  // CONSOLE LOGGING
-  //
-
   logTitle(string) { console.log(this.title(string)); }
+
   logError(string) { console.log(this.error(string)); }
+
   logSuccess(string) { console.log(this.success(string)); }
+
+  log(string) { console.log(`\n${chalk.blue(string)}\n`); }
 
   conditionalLog(...strings) {
     if (this.conditionalLogs) {

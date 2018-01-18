@@ -4,17 +4,17 @@ const chalk = require('chalk');
 const inquirer = require('inquirer');
 const path = require('path');
 const cmd = require('node-cmd');
-const Logger = require('../util/logger.js');
-const projectInfo = require('./projectInfo.js');
-const builderInfo = require('./builderInfo.js');
 const updateStage = require('./updateStage.js');
+const buildProject = require('./buildProject.js');
+const buildModule = require('./buildModule.js');
+const { BuilderInfo, ProjectInfo, Logger } = require('../util')
 
 class CLI {
   constructor() {
     const builderDirectory = path.join(__dirname, '../builders/');
-    builderInfo.generateBuildersFromFolder(builderDirectory).then(() => {
+    BuilderInfo.generateBuildersFromFolder(builderDirectory).then(() => {
       this.greet();
-    })
+    });
   }
 
   greet = () => {
@@ -45,7 +45,7 @@ class CLI {
       exit: 'Exit',
     };
 
-    projectInfo.get().then((info) => {
+    ProjectInfo.get().then((info) => {
       const choices = [];
       // There wasn't a package.json file, so give the option to make a project
       if (info == null || showAll) { choices.push(options.project); }
@@ -72,21 +72,24 @@ class CLI {
       }).then((answer) => {
         switch (answer.main) {
           case options.project:
-            this.project();
+            // this.project();
+            buildProject.run()
+            // buildModule.run()
             break;
           case options.page:
             this.page();
             break;
           case options.module:
-            this.module();
+            buildModule.run()
             break;
           case options.showAll:
             this.menu(true);
             break;
           case options.update:
-            // this.updateProjectStage();
             updateStage.run().then(() => console.log('ha'));
             break;
+          case options.help:
+            this.help();
           default:
             break;
         }
@@ -94,15 +97,11 @@ class CLI {
     });
   }
 
-  runProjectInDevelopment = () => {
-    cmd.run('npm run dev');
-  }
-
   project = () => {
     // Check to see if there's a project already in the current directory.
     //  Even though we're gonna create a sub folder for the project,
     //  it's still weird to create a project inside of a project...
-    projectInfo.get().then((info) => {
+    ProjectInfo.get().then((info) => {
       // If there's already a project in the current directory,
       //  we don't want to create another project
       if (info != null) {
@@ -116,7 +115,7 @@ class CLI {
           default: false,
         }).then((ans) => {
           if (ans.proceed) {
-            projectInfo.getFramework().then((builder) => {
+            ProjectInfo.getFramework().then((builder) => {
               builder.project().then(() => {
                 this.menu();
               });
@@ -128,8 +127,7 @@ class CLI {
       //  (or at least there isn't a package.json file...)
       //  so we can create a new project
       else {
-        projectInfo.getFramework().then((builder) => {
-          console.log('trying project');
+        ProjectInfo.getFramework().then((builder) => {
           builder.project().then(() => {
             this.menu();
           });
@@ -139,7 +137,7 @@ class CLI {
   }
 
   page = () => {
-    projectInfo.getFramework().then((builder) => {
+    ProjectInfo.getFramework().then((builder) => {
       builder.page().then(() => {
         this.menu();
       });
@@ -149,13 +147,18 @@ class CLI {
   }
 
   module = () => {
-    projectInfo.getFramework().then((builder) => {
+    ProjectInfo.getFramework().then((builder) => {
       builder.module().then(() => {
         this.menu();
       });
     }).catch((error) => {
       Logger.logError(error);
     });
+  }
+
+  help = () => {
+    Logger.log('Sending you to the wiki...');
+    cmd.run('open -a "Google Chrome" https://bitbucket.org/lofty/lofty-cli/wiki/Home');
   }
 }
 

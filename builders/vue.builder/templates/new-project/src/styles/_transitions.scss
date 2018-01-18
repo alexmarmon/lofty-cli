@@ -1,0 +1,69 @@
+// Vue Transitions
+// Note: these all begin with a vt prefix for consistency.
+
+@import "_variables";
+@import "_mixins";
+
+// FADE
+
+.vt-fade-enter-active {
+  transition: opacity 0.75s ease 0s;
+}
+
+.vt-fade-leave-active {
+  transition: opacity 0.75s ease 0s;
+}
+
+.vt-fade-enter {
+  opacity: 0.0;
+}
+
+.vt-fade-enter-to {
+  opacity: 1.0;
+}
+
+.vt-fade-leave-to {
+  opacity: 0.0;
+}
+
+
+// FADE QUICK
+
+.vt-fade-quick-enter-active {
+  transition: opacity 0.25s ease 0s;
+}
+
+.vt-fade-quick-leave-active {
+  transition: opacity 0.25s ease 0s;
+}
+
+.vt-fade-quick-enter {
+  opacity: 0.0;
+}
+
+.vt-fade-quick-enter-to {
+  opacity: 1.0;
+}
+
+.vt-fade-quick-leave-to {
+  opacity: 0.0;
+}
+
+// Slide
+
+.vt-slide-enter-active {
+  // enter transition properties
+}
+
+.vt-slide-leave-active {
+  // leave transition properties
+}
+
+.vt-slide-enter {
+}
+
+.vt-slide-enter-to {
+}
+
+.vt-slide-leave-to {
+}
