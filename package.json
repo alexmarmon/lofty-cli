@@ -37,6 +37,6 @@
   },
   "license": "ISC",
   "bin": {
-    "lofty": "./index.js"
+    "14four": "./index.js"
   }
 }
